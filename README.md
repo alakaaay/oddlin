@@ -48,6 +48,7 @@ Meta Pixel `1801702574890246`, base code in `public/index.html`.
 - Commerce events (`ViewContent`, `InitiateCheckout`, `Purchase`, `AddToCart`) carry `content_type: "product"` and `content_ids`: `oddlin_w1`, `oddlin_w4`, `oddlin_w12` for the plans, `trade_audit` for the upsell. `ViewContent` lists all three plans; checkout and purchase list the chosen one with `value`, `currency` and `contents`
 - Custom: `QuizAnswer` (every answer), `ScratchReveal`, `PromoExpired`, `CrossSellDeclined`, `BetaReveal`
 - Every event also goes to `window.dataLayer`.
+- Every event we send carries `session_id`, a random id like `s_0160dacc-7b1f-44d8-a5c0-dd4956820778` created in `<head>` and kept in `sessionStorage` (same id after a reload, new id in a new tab). The email signup stores the same id, so a lead's email can be joined to their pixel events. Meta's automatic `SubscribedButtonClick` events don't have it.
 
 `QuizAnswer` carries the step and what the user picked:
 
@@ -73,7 +74,7 @@ The email screen posts `{ email, answers, page }` to `/api/subscribe`. The funne
 Each signup is stored as one JSON line:
 
 ```json
-{"email":"name@example.com","created_at":"2026-11-03T16:52:56.654Z","answers":{"markets":["sports"],"size":"m","age":true},"page":"/","user_agent":"..."}
+{"email":"name@example.com","session_id":"s_0160dacc-...","created_at":"2026-11-03T16:52:56.654Z","answers":{"markets":["sports"],"size":"m","age":true},"page":"/","user_agent":"..."}
 ```
 
 - **Locally:** appended to `data/subscribers.jsonl`. The folder is in `.gitignore`, so emails never reach git.

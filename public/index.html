@@ -11,6 +11,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Outfit:wght@500;600&display=swap">
 <link rel="stylesheet" href="/css/tokens.css">
 <link rel="stylesheet" href="/css/app.css">
+<script>
+/* Session id: a random id for this browser tab, sent with every pixel event and with the email signup.
+   Kept in sessionStorage, so it survives reloads and resets in a new tab. */
+window.oddlinSession = (function () {
+  var key = 'oddlin_session', id;
+  try { id = sessionStorage.getItem(key); } catch (e) {}
+  if (!id) {
+    id = 's_' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    try { sessionStorage.setItem(key, id); } catch (e) {}
+  }
+  return id;
+})();
+</script>
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -22,7 +35,7 @@ t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1801702574890246');
-fbq('track', 'PageView');
+fbq('track', 'PageView', { session_id: window.oddlinSession });
 </script>
 <!-- End Meta Pixel Code -->
 </head>

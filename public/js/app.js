@@ -1,7 +1,9 @@
-/* Funnel events go to the Meta Pixel (loaded in <head>) and to dataLayer for a future GTM / GA4 setup */
+/* Funnel events go to the Meta Pixel (loaded in <head>) and to dataLayer for a future GTM / GA4 setup.
+   Every event carries session_id (set in <head>), so one visitor's path can be followed step by step. */
 function track(type, name, params) {
-  try { window.fbq(type, name, params || {}); } catch (e) {}
-  (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, params || {}));
+  const data = Object.assign({ session_id: window.oddlinSession }, params || {});
+  try { window.fbq(type, name, data); } catch (e) {}
+  (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, data));
 }
 
 /* Commerce events carry content_ids and content_type so Meta can match them to a catalog.
@@ -21,7 +23,7 @@ function saveEmail(email) {
     fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, answers: state.ans, page: location.pathname }),
+      body: JSON.stringify({ email, session_id: window.oddlinSession, answers: state.ans, page: location.pathname }),
       keepalive: true
     }).catch(() => {});
   } catch (e) {}
