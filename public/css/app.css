@@ -33,6 +33,7 @@ h3 { font-size: 17px; line-height: 22px; }
 .lede b, .lede strong { color: var(--ink); }
 .hint { color: var(--ink-muted); font-size: 14px; line-height: 20px; margin-top: -8px; }
 .disc { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.disc a { color: var(--signal-text); text-underline-offset: 2px; }
 .src { font: 500 11px/16px var(--f-mono); color: var(--ink-muted); letter-spacing: .03em; text-transform: uppercase; }
 
 /* options */

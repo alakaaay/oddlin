@@ -229,7 +229,7 @@ const RENDER = {
         <li>Every signal timestamped and never edited</li>
         <li>Calibration and accuracy against the market, published by category</li>
       </ul>
-      <p class="disc">Sample signal shown. ${DISCLAIMER} Not affiliated with Kalshi or Polymarket.</p>`,
+      <p class="disc">Sample signal shown. ${DISCLAIMER} Not affiliated with Kalshi or Polymarket. <a href="/terms">Terms</a> · <a href="/privacy-policy">Privacy</a></p>`,
     bind: () => setCta([{ label: 'Build my feed', onClick: () => { track('track', 'ViewContent', product(PLANS.map(planId), 'quiz_start')); next(); } }])
   },
   single: { html: s => head(s) + optHtml(s, false), bind: bindSingle },
@@ -302,7 +302,7 @@ const RENDER = {
         <label class="check" for="age"><input type="checkbox" id="age" ${state.ans.age ? 'checked' : ''}><span>I'm 18 or older</span></label>
         <p class="err" id="err" role="alert"></p>
       </form>
-      <p class="disc">We send your setup and product updates. No spam, unsubscribe in one click.</p>`,
+      <p class="disc">We send your setup and product updates. No spam, unsubscribe in one click. See our <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> and <a href="/terms" target="_blank" rel="noopener">Terms</a>.</p>`,
     bind: () => {
       const submit = e => {
         e && e.preventDefault();

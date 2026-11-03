@@ -29,6 +29,9 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `public/css/tokens.css` | Tokens as CSS variables |
 | `public/css/app.css` | Quiz styles |
 | `public/js/app.js` | Quiz steps, rendering, tracking |
+| `public/terms/index.html` | Terms of Use, served at `/terms` |
+| `public/privacy-policy/index.html` | Privacy Policy, served at `/privacy-policy` |
+| `public/css/legal.css` | Styles for the legal pages |
 | `public/assets/logo/` | Logo kit |
 
 ## Funnel
@@ -58,6 +61,10 @@ Meta Pixel `1801702574890246`, base code in `public/index.html`.
 ```
 
 `step_number` is the screen's position in the funnel (0 is the landing). The loader's bottom-sheet question is logged under the loader's number with `step_id: "device"`. On the email step `answer` is `email_submitted`: the address itself is never sent.
+
+## Legal pages
+
+`/terms` and `/privacy-policy` are drafts, not reviewed by a lawyer. Fields highlighted on the page (`.todo`) must be filled before running paid traffic: operator's legal name, mailing address, contact emails, email provider, team country, governing law.
 
 ## Copy rules
 

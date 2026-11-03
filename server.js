@@ -48,12 +48,14 @@ function handle(req, res) {
   const file = path.normalize(path.join(PUBLIC_DIR, pathname));
   if (file !== PUBLIC_DIR && !file.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, 'Forbidden');
 
+  serveFile(req, res, file, true);
+}
+
+// A folder with index.html is served at its clean path (/terms -> public/terms/index.html), the same way Vercel does
+function serveFile(req, res, file, tryIndex) {
   fs.stat(file, (err, stat) => {
-    if (err) return send(res, 404, 'Not found');
-    if (stat.isDirectory()) {
-      res.writeHead(301, { Location: pathname + '/' });
-      return res.end();
-    }
+    if (!err && stat.isDirectory() && tryIndex) return serveFile(req, res, path.join(file, 'index.html'), false);
+    if (err || !stat.isFile()) return send(res, 404, 'Not found');
     res.writeHead(200, {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Content-Length': stat.size,
