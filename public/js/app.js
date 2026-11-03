@@ -14,6 +14,30 @@ function product(ids, name, value) {
   return params;
 }
 
+/* Email goes to our server (/api/subscribe) with the quiz answers. The funnel never waits on it:
+   keepalive lets the request finish even as the screen changes. */
+function saveEmail(email) {
+  try {
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, answers: state.ans, page: location.pathname }),
+      keepalive: true
+    }).catch(() => {});
+  } catch (e) {}
+}
+
+/* Meta advanced matching: re-init the pixel with the email so Lead and later events carry it.
+   We send a SHA-256 hash of the normalized address, never the address itself. */
+async function matchEmail(email) {
+  try {
+    const norm = email.trim().toLowerCase();
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(norm));
+    const em = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    window.fbq('init', '1801702574890246', { em });
+  } catch (e) {}
+}
+
 /* One QuizAnswer per answered step: step number, step id, question and the answer as code and label.
    value is a string or an array (multi-select); labels come from the step's options when it has them. */
 function trackAnswer(s, value, question = s.q, options = s.options) {
@@ -299,19 +323,21 @@ const RENDER = {
       <form id="f" novalidate class="opts">
         <div class="field"><label for="em">Email</label>
           <input class="input" id="em" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com" value="${esc(state.email)}"></div>
-        <label class="check" for="age"><input type="checkbox" id="age" ${state.ans.age ? 'checked' : ''}><span>I'm 18 or older</span></label>
         <p class="err" id="err" role="alert"></p>
       </form>
-      <p class="disc">We send your setup and product updates. No spam, unsubscribe in one click. See our <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a> and <a href="/terms" target="_blank" rel="noopener">Terms</a>.</p>`,
+      <p class="disc">By submitting your email, you confirm you're 18 or older and agree to our <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>. We'll email your feed setup and news about Oddlin's launch. Unsubscribe anytime. We never sell your email.</p>`,
     bind: () => {
-      const submit = e => {
+      let sending = false;
+      const submit = async e => {
         e && e.preventDefault();
+        if (sending) return;
         const v = $('#em').value.trim();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { $('#err').textContent = 'Enter an email like name@example.com.'; return; }
-        if (!$('#age').checked) { $('#err').textContent = 'Prediction markets are for adults. Confirm you are 18 or older.'; return; }
+        sending = true; $('#cta0').disabled = true;
         state.email = v; state.ans.age = true;
-        /* the address itself never goes to the pixel */
+        saveEmail(v);
         trackAnswer(STEPS[state.idx], 'email_submitted', 'Where should we send your feed setup?', [{ v: 'email_submitted', label: 'Email submitted, 18+ confirmed' }]);
+        await matchEmail(v);
         track('track', 'Lead', { content_name: 'quiz_email', step_number: state.idx });
         next();
       };

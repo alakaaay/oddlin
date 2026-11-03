@@ -1,17 +1,20 @@
 // Oddlin quiz server. Node built-ins only, no npm install.
 // Serves public/ on 127.0.0.1, starting at port 3000 and moving to the next free port if it is taken.
+// POST /api/subscribe saves email signups to data/subscribers.jsonl (see lib/subscribe.js).
 // Usage: node server.js [--open]   (--open launches the default browser once the server is up)
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const { saveSubscriber } = require('./lib/subscribe');
 
 const HOST = '127.0.0.1';
 const FIRST_PORT = Number(process.env.PORT) || 3000;
 const MAX_TRIES = 50;
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const OPEN = process.argv.includes('--open');
+const MAX_BODY = 16 * 1024;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -33,7 +36,39 @@ function send(res, status, body, type = 'text/plain; charset=utf-8') {
   res.end(body);
 }
 
+// POST /api/subscribe: email signups, stored by lib/subscribe.js
+function subscribe(req, res) {
+  if (!String(req.headers['content-type'] || '').startsWith('application/json')) return send(res, 415, 'Expected JSON');
+  let raw = '';
+  let tooBig = false;
+  req.setEncoding('utf8');
+  req.on('data', chunk => {
+    raw += chunk;
+    if (raw.length > MAX_BODY && !tooBig) {
+      tooBig = true;
+      res.writeHead(413, { 'Content-Type': TYPES['.json'], Connection: 'close' });
+      res.end(JSON.stringify({ ok: false, error: 'too_large' }));
+      req.pause();
+    }
+  });
+  req.on('end', async () => {
+    if (tooBig) return;
+    let body;
+    try { body = JSON.parse(raw); } catch { return send(res, 400, JSON.stringify({ ok: false, error: 'bad_json' }), TYPES['.json']); }
+    try {
+      const result = await saveSubscriber(body, { userAgent: req.headers['user-agent'] });
+      send(res, result.status, JSON.stringify(result.body), TYPES['.json']);
+    } catch (err) {
+      console.error(`Could not save signup: ${err.message}`);
+      send(res, 500, JSON.stringify({ ok: false, error: 'server_error' }), TYPES['.json']);
+    }
+  });
+}
+
 function handle(req, res) {
+  if (req.url.split('?')[0] === '/api/subscribe') {
+    return req.method === 'POST' ? subscribe(req, res) : send(res, 405, 'Method not allowed');
+  }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
 
   let pathname;
