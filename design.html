@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oddlin Design Tokens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Outfit:wght@500;600&display=swap">
+<style>
+/*
+  Oddlin design tokens. Source: Oddlin Design System (claude.ai artifact 6KFkxWCvgnA8gyDdsTbYsj).
+  public/css/tokens.css is a copy of the :root blocks below. Change a value here first, then copy it there.
+
+  Rules from the system:
+  - Lines, not shadows. Surfaces are separated by 1px --line. The only shadow is the focus ring.
+  - --signal is a mark color (dots, chart lines, the knob). Blue text uses --signal-text.
+  - One --action button per screen. Outcomes use --hit / --miss with the word and glyph, never color alone.
+  - Fonts: Outfit for headlines and big numbers, Figtree for UI and reading, JetBrains Mono for IDs and timestamps.
+*/
+:root {
+  /* color: app */
+  --ground: #F6F7F9;
+  --surface: #FFFFFF;
+  --line: #E3E6EC;
+  --line-strong: #C9CED8;      /* quiz addition: input and option borders */
+  --ink: #111318;
+  --ink-muted: #5E6573;
+  --signal: #4C6FFF;
+  --signal-text: #3352E0;
+  --signal-soft: #E8EDFF;
+  --action: #3B57F0;
+  --on-action: #FFFFFF;
+  --hit: #0A6E78;
+  --hit-soft: #E1F4F5;
+  --miss: #B93C0A;
+  --miss-soft: #FDEBDF;
+  --tile: #111318;             /* quiz addition: app icon tile */
+  --tile-ring: #FFFFFF;        /* quiz addition: ring on the tile */
+  --scrim: rgba(17, 19, 24, .45);
+
+  /* type */
+  --f-display: "Outfit", "Avenir Next", system-ui, sans-serif;
+  --f-sans: "Figtree", "Helvetica Neue", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* radius */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-icon: 22%;
+  --r-full: 999px;
+
+  /* spacing, 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* shadow: none by design, focus ring only */
+  --shadow: none;
+  --shadow-focus: 0 0 0 3px var(--signal-soft);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0B0D11; --surface: #15181E; --line: #262B34; --line-strong: #3A404C;
+  --ink: #F2F4F7; --ink-muted: #9AA3B2;
+  --signal-text: #8EA2FF; --signal-soft: #1A2247;
+  --action: #7B93FF; --on-action: #0B0D11;
+  --hit: #4FC8D0; --hit-soft: #0E2A2E; --miss: #FF8F57; --miss-soft: #3A1A0C;
+  --tile: #1F232B; --tile-ring: #F2F4F7; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --ground: #0B0D11; --surface: #15181E; --line: #262B34; --line-strong: #3A404C;
+  --ink: #F2F4F7; --ink-muted: #9AA3B2;
+  --signal-text: #8EA2FF; --signal-soft: #1A2247;
+  --action: #7B93FF; --on-action: #0B0D11;
+  --hit: #4FC8D0; --hit-soft: #0E2A2E; --miss: #FF8F57; --miss-soft: #3A1A0C;
+  --tile: #1F232B; --tile-ring: #F2F4F7; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; }
+
+/* this page only */
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 400 15px/22px var(--f-sans); }
+.wrap { max-width: 960px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-left, 0px)) 64px; display: grid; gap: 40px; }
+h1 { font: 600 40px/44px var(--f-display); letter-spacing: -.02em; margin: 0; }
+h2 { font: 600 24px/30px var(--f-display); margin: 0 0 16px; }
+p { margin: 0; color: var(--ink-muted); max-width: 65ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sw { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+.sw i { display: block; height: 64px; border-bottom: 1px solid var(--line); }
+.sw div { padding: 10px 12px; font: 500 12px/16px var(--f-mono); }
+.sw span { display: block; color: var(--ink-muted); }
+.type { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px; }
+.type small { display: block; font: 500 11px/16px var(--f-mono); color: var(--ink-muted); }
+.row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
+.rad { width: 88px; height: 88px; background: var(--signal-soft); border: 1px solid var(--signal); display: grid; place-items: center; font: 500 11px var(--f-mono); }
+.sp { height: 16px; background: var(--signal); border-radius: 2px; }
+.sp-row { display: grid; grid-template-columns: 90px 1fr; gap: 12px; align-items: center; font: 500 12px var(--f-mono); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>Oddlin design tokens</h1>
+    <p>Colors, type, radii, spacing and shadows for the quiz and the app. Light and dark follow the system theme. The app copies these values into <code>public/css/tokens.css</code>.</p>
+  </header>
+
+  <section><h2>Color</h2><div class="grid" id="colors"></div></section>
+
+  <section>
+    <h2>Type</h2>
+    <div class="type">
+      <div><small>display · Outfit 600 · 40/44</small><div style="font:600 40px/44px var(--f-display);letter-spacing:-.02em">Every signal. Public.</div></div>
+      <div><small>title · Outfit 600 · 24/30</small><div style="font:600 24px/30px var(--f-display)">Track record</div></div>
+      <div><small>heading · Outfit 600 · 18/24</small><div style="font:600 18px/24px var(--f-display)">Will the Fed cut rates in December?</div></div>
+      <div><small>price · Outfit 600 · 32/36</small><div style="font:600 32px/36px var(--f-display);font-variant-numeric:tabular-nums">62¢</div></div>
+      <div><small>body · Figtree 400 · 15/22</small><div>Fair value comes from sportsbook consensus, CME FedWatch and NOAA.</div></div>
+      <div><small>label · Figtree 600 · 13/18</small><div style="font:600 13px/18px var(--f-sans);letter-spacing:.02em">Fair value</div></div>
+      <div><small>data · JetBrains Mono 500 · 13/18</small><div style="font:500 13px/18px var(--f-mono)">#1284 · 2026-11-02 14:05 UTC</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Radius</h2>
+    <div class="row">
+      <div class="rad" style="border-radius:var(--r-sm)">--r-sm 6</div>
+      <div class="rad" style="border-radius:var(--r-md)">--r-md 12</div>
+      <div class="rad" style="border-radius:var(--r-lg)">--r-lg 20</div>
+      <div class="rad" style="border-radius:var(--r-icon)">--r-icon 22%</div>
+      <div class="rad" style="border-radius:var(--r-full)">--r-full</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Spacing</h2>
+    <div style="display:grid;gap:8px" id="spacing"></div>
+  </section>
+
+  <section>
+    <h2>Shadow</h2>
+    <p>None. Oddlin draws a 1px <code>--line</code> where other products drop a shadow. The only shadow is <code>--shadow-focus</code> on a focused input.</p>
+  </section>
+</div>
+<script>
+const colors = ['ground', 'surface', 'line', 'line-strong', 'ink', 'ink-muted', 'signal', 'signal-text', 'signal-soft', 'action', 'on-action', 'hit', 'hit-soft', 'miss', 'miss-soft', 'tile', 'tile-ring'];
+const css = getComputedStyle(document.documentElement);
+document.getElementById('colors').innerHTML = colors.map(c => `<div class="sw"><i style="background:var(--${c})"></i><div>--${c}<span>${css.getPropertyValue('--' + c).trim()}</span></div></div>`).join('');
+document.getElementById('spacing').innerHTML = [1, 2, 3, 4, 6, 8, 12].map(n => `<div class="sp-row">--space-${n}<div class="sp" style="width:var(--space-${n})"></div></div>`).join('');
+</script>
+</body>
+</html>

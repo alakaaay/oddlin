@@ -1,0 +1,63 @@
+/* Oddlin design tokens, copied from design.html. Edit design.html first, then this file. */
+:root {
+  /* color: app */
+  --ground: #F6F7F9;
+  --surface: #FFFFFF;
+  --line: #E3E6EC;
+  --line-strong: #C9CED8;      /* quiz addition: input and option borders */
+  --ink: #111318;
+  --ink-muted: #5E6573;
+  --signal: #4C6FFF;
+  --signal-text: #3352E0;
+  --signal-soft: #E8EDFF;
+  --action: #3B57F0;
+  --on-action: #FFFFFF;
+  --hit: #0A6E78;
+  --hit-soft: #E1F4F5;
+  --miss: #B93C0A;
+  --miss-soft: #FDEBDF;
+  --tile: #111318;             /* quiz addition: app icon tile */
+  --tile-ring: #FFFFFF;        /* quiz addition: ring on the tile */
+  --scrim: rgba(17, 19, 24, .45);
+
+  /* type */
+  --f-display: "Outfit", "Avenir Next", system-ui, sans-serif;
+  --f-sans: "Figtree", "Helvetica Neue", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* radius */
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-icon: 22%;
+  --r-full: 999px;
+
+  /* spacing, 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* shadow: none by design, focus ring only */
+  --shadow: none;
+  --shadow-focus: 0 0 0 3px var(--signal-soft);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0B0D11; --surface: #15181E; --line: #262B34; --line-strong: #3A404C;
+  --ink: #F2F4F7; --ink-muted: #9AA3B2;
+  --signal-text: #8EA2FF; --signal-soft: #1A2247;
+  --action: #7B93FF; --on-action: #0B0D11;
+  --hit: #4FC8D0; --hit-soft: #0E2A2E; --miss: #FF8F57; --miss-soft: #3A1A0C;
+  --tile: #1F232B; --tile-ring: #F2F4F7; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --ground: #0B0D11; --surface: #15181E; --line: #262B34; --line-strong: #3A404C;
+  --ink: #F2F4F7; --ink-muted: #9AA3B2;
+  --signal-text: #8EA2FF; --signal-soft: #1A2247;
+  --action: #7B93FF; --on-action: #0B0D11;
+  --hit: #4FC8D0; --hit-soft: #0E2A2E; --miss: #FF8F57; --miss-soft: #3A1A0C;
+  --tile: #1F232B; --tile-ring: #F2F4F7; --scrim: rgba(0, 0, 0, .6);
+  color-scheme: dark; }

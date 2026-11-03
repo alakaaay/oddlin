@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oddlin Feed Quiz</title>
+<meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0D11" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Outfit:wght@500;600&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/app.css">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1801702574890246');
+fbq('track', 'PageView');
+</script>
+<!-- End Meta Pixel Code -->
+</head>
+<body>
+<noscript><img height="1" width="1" style="display:none" alt=""
+src="https://www.facebook.com/tr?id=1801702574890246&ev=PageView&noscript=1"
+/></noscript>
+<div class="app">
+  <header>
+    <div class="top">
+      <button class="back" id="back" aria-label="Back" style="visibility: hidden">
+        <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"/></svg>
+      </button>
+      <svg class="logo" viewBox="0 0 391 96" role="img" aria-label="Oddlin">
+        <g transform="scale(0.1875)">
+          <rect width="512" height="512" rx="112" fill="var(--tile)"/>
+          <circle cx="256" cy="256" r="120" fill="none" stroke="var(--tile-ring)" stroke-width="48"/>
+          <circle cx="340.85" cy="171.15" r="46" fill="#4C6FFF" stroke="var(--tile)" stroke-width="18"/>
+        </g>
+        <g transform="translate(124 -1.5) scale(0.9)">
+          <g fill="none" stroke="var(--ink)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="30" cy="55" r="20"/><circle cx="92" cy="55" r="20"/><path d="M112 10 V75"/>
+            <circle cx="154" cy="55" r="20"/><path d="M174 10 V75"/><path d="M198 10 V75"/><path d="M222 35 V75"/>
+            <path d="M246 75 V55 A20 20 0 0 1 286 55 V75"/>
+          </g>
+          <circle cx="222" cy="14" r="7" fill="#4C6FFF"/>
+        </g>
+      </svg>
+      <span class="stepnum" id="stepnum"></span>
+    </div>
+    <div class="progress" id="progress" hidden><i id="bar"></i></div>
+  </header>
+  <main id="main"></main>
+  <div class="cta" id="cta" hidden></div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
