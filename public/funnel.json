@@ -1,6 +1,6 @@
 {
   "slug": "john-35plus",
-  "version": 3,
+  "version": 4,
   "name": "Adults 35+ new to prediction markets",
   "steps": [
     { "key": "landing", "type": "landing" },
@@ -56,6 +56,8 @@
       { "code": "500", "label": "Up to $500" }
     ] },
     { "key": "plan", "type": "plan" },
+    { "key": "compare", "type": "compare" },
+    { "key": "benefits", "type": "benefits" },
     { "key": "scratch", "type": "scratch" },
     { "key": "paywall", "type": "paywall" },
     { "key": "welcome", "type": "done" }

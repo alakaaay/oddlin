@@ -97,6 +97,17 @@ const TIPS = [
   'Prices move as soon as news breaks.'
 ];
 
+/* "You now vs With Oddlin": each fear the user picked, then what Oddlin changes about it */
+const FEAR_FLIP = {
+  how: ["Not sure how it works", "Every market in plain English"],
+  lose: ["Afraid to lose money", "Max loss shown before every trade"],
+  gambling: ["Feels like gambling", "Odds and math, not luck"],
+  trust: ["Not sure which app to trust", "Practice first, then regulated exchanges"]
+};
+const ICON_X = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 6l8 8M14 6l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const ICON_V = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.4l3.2 3.2L15 6.8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SPARK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3.5l1.6 4.9 4.9 1.6-4.9 1.6L10 16.5l-1.6-4.9L3.5 10l4.9-1.6zM18 13l.9 2.6 2.6.9-2.6.9L18 20l-.9-2.6-2.6-.9 2.6-.9zM18.5 2.5l.6 1.8 1.8.6-1.8.6-.6 1.8-.6-1.8-1.8-.6 1.8-.6z" fill="currentColor"/></svg>';
+
 const DISCLAIMER = 'Education only, not financial advice. Prediction markets involve risk of loss.';
 const PROMO_MIN = 10;
 
@@ -390,6 +401,46 @@ const RENDER = {
         ${p.fearGambling ? '<div class="feed-row"><dt>Approach</dt><dd>Odds and math first, no blind guesses</dd></div>' : ''}
       </dl>
       ${p.fearLose ? '<div class="callout">You said you’re afraid to lose money. You won’t risk a dollar until you choose to.</div>' : ''}`; },
+    bind: () => setCta([{ label: 'Continue', onClick: next }])
+  },
+  /* Before and after, built from the fears they picked (Empacer-style). The line is confidence, not money */
+  compare: {
+    html: () => {
+      const picked = state.ans.fears || [];
+      const keys = picked.concat(Object.keys(FEAR_FLIP).filter(k => !picked.includes(k))).slice(0, 3);
+      return `
+      <h2>Stop guessing. Start reading the odds.</h2>
+      <div class="vs">
+        <div class="vs-head"><b>You now</b><span class="vs-ic no">${ICON_X}</span></div>
+        <div class="vs-head with"><b>With Oddlin</b><span class="vs-ic yes">${ICON_V}</span></div>
+        <svg class="vs-chart" viewBox="0 0 300 120" role="img" aria-label="Your confidence: flat now, rising over 28 days">
+          <path class="vs-grid" d="M8 30H292M8 60H292M8 90H292"/>
+          <path class="vs-flat" d="M10 100C60 99 100 98 150 96"/>
+          <path class="vs-up" d="M150 96C170 92 178 44 198 42S226 66 244 58S270 36 284 24"/>
+          <path class="vs-up" d="M272 22L286 22L282 36"/>
+          <text x="10" y="116">Day 1</text><text class="with" x="290" y="116" text-anchor="end">Day 28</text>
+        </svg>
+        <ul class="vs-list">${keys.map(k => `<li><span class="vs-dot no">${ICON_X}</span>${FEAR_FLIP[k][0]}</li>`).join('')}</ul>
+        <ul class="vs-list with">${keys.map(k => `<li><span class="vs-dot yes">${ICON_V}</span>${FEAR_FLIP[k][1]}</li>`).join('')}</ul>
+      </div>
+      <p class="disc">The line shows how confident you feel, not money. ${DISCLAIMER}</p>`;
+    },
+    bind: () => setCta([{ label: 'Continue', onClick: next }])
+  },
+  /* What the subscription gives, as a list with icons (Empacer-style) */
+  benefits: {
+    html: () => { const p = profile(); return `
+      <p class="lede center">Your 28-day plan tells you exactly what to do every day.</p>
+      <div class="card have">
+        <h2>With Oddlin, you will have</h2>
+        <ol class="have-list">
+          <li><span class="have-ic">${SPARK}</span><b>A plan built for you</b><span>Around ${esc(p.events)}, ${esc(p.minutes)} minutes a day</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>A practice account</b><span>Play money on live Kalshi and Polymarket odds</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>An AI coach</b><span>Shows where your guesses go wrong, and why</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>Your own limits</b><span>Real money stays off until you choose</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>And much more…</b></li>
+        </ol>
+      </div>`; },
     bind: () => setCta([{ label: 'Continue', onClick: next }])
   },
   /* Scratch promo: EARLY50 + today's date (EARLY50-NOV04), echoing the "you're early" screen. Reserved for 10 minutes.

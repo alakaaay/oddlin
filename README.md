@@ -44,7 +44,7 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 
 ## Funnel
 
-Landing (FOMO hook + plain-English ticket) → 8 steps: age, booms you sat out, “you're early” timeline, what holds you back, experience, odds explainer, events, email → magic page (three progress bars, each pauses for a popup question: practice-first statement, daily time, monthly limit) → personal 28-day plan → scratch promo (−50%, 10-minute timer) → three plans with billing timeline and auto-renew notice → beta-test reveal. No payment is taken anywhere.
+Landing (FOMO hook + plain-English ticket) → 8 steps: age, booms you sat out, “you're early” timeline, what holds you back, experience, odds explainer, events, email → magic page (three progress bars, each pauses for a popup question: practice-first statement, daily time, monthly limit) → personal 28-day plan → “You now vs With Oddlin” (built from the fears they picked; the chart is confidence, not money) → “With Oddlin, you will have” → scratch promo (−50%, 10-minute timer) → three plans with billing timeline and auto-renew notice → beta-test reveal. No payment is taken anywhere.
 
 ## Tracking
 
@@ -76,7 +76,7 @@ Meta Pixel `1801702574890246`, base code in `public/quiz/index.html`.
 
 ## Data flow
 
-1. The quiz loads `/funnel.json` (slug `john-35plus`, version 3) and shows its steps. Steps of type `popup` are asked over the magic page, not as screens. Version 1 had the masterclass upsell; version 2 asked time, limit and the practice statement before the email.
+1. The quiz loads `/funnel.json` (slug `john-35plus`, version 4) and shows its steps. Steps of type `popup` are asked over the magic page, not as screens. Version 1 had the masterclass upsell; version 2 asked time, limit and the practice statement before the email; version 3 had no compare and benefits screens.
 2. Every pixel event, plus a `ScreenView` on each screen (database only), is POSTed to `/api/event` with the session id, funnel slug and version, step key, answer codes, value and visit metadata (UTM tags, device).
 3. The email goes to `/api/subscribe`. Submitting it counts as confirming 18+ and agreeing to the Terms and Privacy Policy; there is no checkbox.
 4. The server calls `log_event` / `save_lead` in Postgres (`db/functions.sql`) through Supabase REST with the secret key. Each call creates the session row on first use, so events and leads always have a session.

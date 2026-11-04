@@ -23,7 +23,7 @@ create table if not exists funnel_steps (
   funnel_id    bigint not null references funnels (id),
   step_number  int  not null,                     -- 0 = landing
   step_key     text not null,                     -- 'age', 'fears', 'paywall' (the id used in app.js)
-  type         text not null,                     -- landing, single, multi, fact, statement, email, loader, popup, plan, scratch, paywall, done
+  type         text not null,                     -- landing, single, multi, fact, statement, email, loader, popup, plan, compare, benefits, scratch, paywall, done
   question     text,                              -- null for screens without a question
   options      jsonb,                             -- [{"code":"45-54","label":"45 to 54"}, …]
   unique (funnel_id, step_number),
