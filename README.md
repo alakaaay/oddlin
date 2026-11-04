@@ -8,7 +8,7 @@ An app that helps adults 35+ who sat out crypto and stock booms learn prediction
 - **Windows:** double-click `start.bat`
 - **Terminal:** `node server.js` (add `--open` to open the browser)
 
-The server listens on `127.0.0.1:3000`. If 3000 is busy it takes the next free port and prints the address. Needs Node.js 18 or newer; no `npm install`.
+The server listens on `127.0.0.1:3000` and opens the quiz at `/quiz` (the root redirects there, keeping UTM tags). If 3000 is busy it takes the next free port and prints the address. Needs Node.js 18 or newer; no `npm install`.
 
 The first time on macOS, Gatekeeper may block `start.command`: right-click it, choose Open, then Open again.
 
@@ -32,7 +32,8 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `scripts/db.js` | Runs SQL against Supabase |
 | `start.command`, `start.bat` | Launchers for macOS and Windows |
 | `design.html` | Design tokens, open it in a browser to see them |
-| `public/index.html` | Quiz markup and the Meta Pixel base code |
+| `public/quiz/index.html` | Quiz markup and the Meta Pixel base code, served at `/quiz` |
+| `vercel.json` | Redirects `/` to `/quiz` on Vercel |
 | `public/css/tokens.css` | Tokens as CSS variables |
 | `public/css/app.css` | Quiz styles |
 | `public/js/app.js` | Quiz steps, rendering, tracking |
@@ -43,15 +44,16 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 
 ## Funnel
 
-Landing (FOMO hook + plain-English ticket) → 11 steps: age, booms you sat out, “you're not late” fact, what holds you back, experience, ticket explainer, events, daily time, monthly limit, practice-first statement, email → loader → personal 28-day plan → scratch promo (−50%, 10-minute timer) → three plans with billing timeline → masterclass upsell ($19) → beta-test reveal. No payment is taken anywhere.
+Landing (FOMO hook + plain-English ticket) → 8 steps: age, booms you sat out, “you're early” timeline, what holds you back, experience, odds explainer, events, email → magic page (three progress bars, each pauses for a popup question: practice-first statement, daily time, monthly limit) → personal 28-day plan → scratch promo (−50%, 10-minute timer) → three plans with billing timeline and auto-renew notice → beta-test reveal. No payment is taken anywhere.
 
 ## Tracking
 
-Meta Pixel `1801702574890246`, base code in `public/index.html`.
+Meta Pixel `1801702574890246`, base code in `public/quiz/index.html`.
 
-- Standard events: `PageView`, `ViewContent` (quiz start), `Lead` (email), `InitiateCheckout` (paywall), `Purchase` (Start membership, no real charge), `AddToCart` (Trade Audit)
-- Commerce events (`ViewContent`, `InitiateCheckout`, `Purchase`, `AddToCart`) carry `content_type: "product"` and `content_ids`: `oddlin_w1`, `oddlin_w4`, `oddlin_w12` for the plans, `masterclass` for the upsell. `ViewContent` lists all three plans; checkout and purchase list the chosen one with `value`, `currency` and `contents`
-- Custom: `QuizAnswer` (every answer), `ScratchReveal`, `PromoExpired`, `CrossSellDeclined`, `BetaReveal`
+- Standard events: `PageView`, `ViewContent` (quiz start), `Lead` (email), `InitiateCheckout` (paywall), `Purchase` (Start my plan, no real charge)
+- Commerce events (`ViewContent`, `InitiateCheckout`, `Purchase`) carry `content_type: "product"` and `content_ids`: `oddlin_w1`, `oddlin_w4`, `oddlin_w12`. `ViewContent` lists all three plans; checkout and purchase list the chosen one with `value`, `currency` and `contents`. `InitiateCheckout` fires once per visit
+- `Purchase` goes to Meta with `value: 0`, since nothing is charged, so Ads Manager shows no fake revenue. The price the user would have paid is in `plan_price`, and the database stores it as the event's `value`
+- Custom: `QuizAnswer` (every answer), `ScratchReveal` (promo code `EARLY50-` + today's date, e.g. `EARLY50-NOV04`), `PromoExpired`, `BetaReveal`
 - Every event also goes to `window.dataLayer`.
 - Every event we send carries `session_id`, a random id like `s_0160dacc-7b1f-44d8-a5c0-dd4956820778` created in `<head>` and kept in `sessionStorage` (same id after a reload, new id in a new tab). The email signup stores the same id, so a lead's email can be joined to their pixel events. Meta's automatic `SubscribedButtonClick` events don't have it.
 
@@ -68,13 +70,13 @@ Meta Pixel `1801702574890246`, base code in `public/index.html`.
 }
 ```
 
-`step_number` is the screen's position in the funnel (0 is the landing). The monthly limit step is private: Meta gets `answer: "private"`, the amount stays in the email signup only. On the email step `answer` is `email_submitted`.
+`step_number` is the screen's position in the funnel (0 is the landing). The monthly limit step is private: Meta gets `answer: "private"`; the real answer is stored only in our database (`events`). On the email step `answer` is `email_submitted`.
 
 `Lead` uses Meta advanced matching: the browser hashes the lowercased email with SHA-256 and re-inits the pixel with `{ em: <hash> }` right before `Lead`, so Lead and later events carry `ud[em]`. The readable address never goes to Meta.
 
 ## Data flow
 
-1. The quiz loads `/funnel.json` (slug `john-35plus`, version 1) and shows its steps.
+1. The quiz loads `/funnel.json` (slug `john-35plus`, version 3) and shows its steps. Steps of type `popup` are asked over the magic page, not as screens. Version 1 had the masterclass upsell; version 2 asked time, limit and the practice statement before the email.
 2. Every pixel event, plus a `ScreenView` on each screen (database only), is POSTed to `/api/event` with the session id, funnel slug and version, step key, answer codes, value and visit metadata (UTM tags, device).
 3. The email goes to `/api/subscribe`. Submitting it counts as confirming 18+ and agreeing to the Terms and Privacy Policy; there is no checkbox.
 4. The server calls `log_event` / `save_lead` in Postgres (`db/functions.sql`) through Supabase REST with the secret key. Each call creates the session row on first use, so events and leads always have a session.

@@ -87,6 +87,11 @@ function handle(req, res) {
   } catch {
     return send(res, 400, 'Bad request');
   }
+  // The quiz lives at /quiz; the root redirects there and keeps the query string (UTM tags), like vercel.json does
+  if (pathname === '/') {
+    res.writeHead(307, { Location: '/quiz' + new URL(req.url, `http://${HOST}`).search, 'Cache-Control': 'no-store' });
+    return res.end();
+  }
   if (pathname.endsWith('/')) pathname += 'index.html';
 
   // Resolve inside public/ only: blocks ../ traversal and absolute paths
@@ -130,7 +135,7 @@ function listen(port, triesLeft) {
     process.exit(1);
   });
   server.listen(port, HOST, () => {
-    const url = `http://${HOST}:${port}/`;
+    const url = `http://${HOST}:${port}/quiz`;
     console.log(`Oddlin quiz is running at ${url}`);
     console.log('Press Ctrl+C to stop.');
     if (OPEN) openBrowser(url);

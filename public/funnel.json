@@ -1,6 +1,6 @@
 {
   "slug": "john-35plus",
-  "version": 1,
+  "version": 3,
   "name": "Adults 35+ new to prediction markets",
   "steps": [
     { "key": "landing", "type": "landing" },
@@ -18,7 +18,7 @@
       { "code": "none", "label": "None of these" }
     ] },
     { "key": "fact_late", "type": "fact" },
-    { "key": "fears", "type": "multi", "question": "What holds you back?", "hint": "Pick up to two.", "max": 2, "options": [
+    { "key": "fears", "type": "multi", "question": "What holds you back?", "hint": "Pick all that apply.", "options": [
       { "code": "how", "label": "I don't get how it works" },
       { "code": "lose", "label": "I'm afraid to lose money" },
       { "code": "gambling", "label": "It feels like gambling" },
@@ -30,35 +30,34 @@
       { "code": "some", "label": "A few times" }
     ] },
     { "key": "fact_ticket", "type": "fact" },
-    { "key": "events", "type": "multi", "question": "Which events would you follow?", "hint": "No sports. Only events that touch your money.", "options": [
+    { "key": "events", "type": "multi", "question": "Which events would you follow?", "hint": "Pick the ones you'd follow anyway.", "options": [
       { "code": "fed", "label": "The Fed and interest rates" },
       { "code": "inflation", "label": "Inflation and gas prices" },
       { "code": "jobs", "label": "Jobs and the economy" },
       { "code": "weather", "label": "Weather" },
       { "code": "elections", "label": "Elections" }
     ] },
-    { "key": "time", "type": "single", "question": "How much time can you give it a day?", "options": [
+    { "key": "email", "type": "email", "question": "Where should we send it?" },
+    { "key": "loader", "type": "loader" },
+    { "key": "st_practice", "type": "popup", "statement": true, "question": "I'd rather practice first than risk real money.", "options": [
+      { "code": "disagree", "label": "Disagree" },
+      { "code": "not_sure", "label": "Not sure" },
+      { "code": "agree", "label": "Agree" }
+    ] },
+    { "key": "time", "type": "popup", "question": "How much time can you give it a day?", "options": [
       { "code": "5", "label": "5 minutes" },
       { "code": "10", "label": "10 minutes" },
       { "code": "15", "label": "15 minutes or more" }
     ] },
-    { "key": "limit", "type": "single", "question": "When you go live, what monthly limit feels safe?", "hint": "You can change it later. Trades above it are blocked.", "private": true, "options": [
+    { "key": "limit", "type": "popup", "question": "When you go live, what monthly limit feels safe?", "hint": "You can change it later. Trades above it are blocked.", "private": true, "options": [
       { "code": "0", "label": "Practice only for now" },
       { "code": "50", "label": "Up to $50" },
       { "code": "200", "label": "Up to $200" },
       { "code": "500", "label": "Up to $500" }
     ] },
-    { "key": "st_practice", "type": "statement", "question": "I'd rather practice first than risk real money.", "options": [
-      { "code": "disagree", "label": "Disagree" },
-      { "code": "not_sure", "label": "Not sure" },
-      { "code": "agree", "label": "Agree" }
-    ] },
-    { "key": "email", "type": "email", "question": "Where should we send it?" },
-    { "key": "loader", "type": "loader" },
     { "key": "plan", "type": "plan" },
     { "key": "scratch", "type": "scratch" },
     { "key": "paywall", "type": "paywall" },
-    { "key": "upsell", "type": "crosssell" },
     { "key": "welcome", "type": "done" }
   ]
 }
