@@ -99,7 +99,7 @@ const TIPS = [
 
 /* "You now vs With Oddlin": each fear the user picked, then what Oddlin changes about it */
 const FEAR_FLIP = {
-  how: ["Not sure how it works", "Every market in plain English"],
+  how: ["Not sure how it works", "Every market without jargon"],
   lose: ["Afraid to lose money", "Max loss shown before every trade"],
   gambling: ["Feels like gambling", "Odds and math, not luck"],
   trust: ["Not sure which app to trust", "Practice first, then regulated exchanges"]
@@ -435,9 +435,9 @@ const RENDER = {
         <h2>With Oddlin, you will have</h2>
         <ol class="have-list">
           <li><span class="have-ic">${SPARK}</span><b>A plan built for you</b><span>Around ${esc(p.events)}, ${esc(p.minutes)} minutes a day</span></li>
-          <li><span class="have-ic">${SPARK}</span><b>A practice account</b><span>Play money on live Kalshi and Polymarket odds</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>Short daily lessons</b><span>Odds, prices and payouts, without jargon</span></li>
+          <li><span class="have-ic">${SPARK}</span><b>A trading simulator</b><span>Trade live Kalshi and Polymarket events with play money and see how your calls play out</span></li>
           <li><span class="have-ic">${SPARK}</span><b>An AI coach</b><span>Shows where your guesses go wrong, and why</span></li>
-          <li><span class="have-ic">${SPARK}</span><b>Your own limits</b><span>Real money stays off until you choose</span></li>
           <li><span class="have-ic">${SPARK}</span><b>And much more…</b></li>
         </ol>
       </div>`; },
