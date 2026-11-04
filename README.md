@@ -25,6 +25,8 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `server.js` | Static server for `public/` and `POST /api/subscribe` |
 | `lib/subscribe.js` | Validates and stores an email signup |
 | `api/subscribe.js` | The same endpoint as a Vercel function |
+| `db/schema.sql` | Database tables and views |
+| `scripts/db.js` | Runs SQL against Supabase |
 | `start.command`, `start.bat` | Launchers for macOS and Windows |
 | `design.html` | Design tokens, open it in a browser to see them |
 | `public/index.html` | Quiz markup and the Meta Pixel base code |
@@ -92,6 +94,19 @@ function doPost(e) {
 ```
 
 The same variable also works locally: `SUBSCRIBE_WEBHOOK_URL=https://... node server.js` writes to the file and the sheet.
+
+## Database
+
+Supabase Postgres, schema in `db/schema.sql` (applied 2026-11-04): `funnels`, `funnel_steps`, `sessions`, `events`, `leads`, plus views `session_progress` (furthest step per session) and `session_answers` (answers with labels). RLS is on with no policies: only the server's secret key can read or write.
+
+Run SQL without psql or npm:
+
+```bash
+node scripts/db.js db/schema.sql
+node scripts/db.js -c "select * from session_progress limit 10"
+```
+
+`scripts/db.js` speaks the Postgres protocol with Node built-ins, reads `POSTGRES_URL_NON_POOLING` from `.env.local`, and verifies TLS against `db/supabase-ca.crt` (Supabase Root 2021 CA, public, valid until 2031).
 
 ## Legal pages
 
