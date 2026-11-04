@@ -10,15 +10,7 @@ const path = require('path');
 const net = require('net');
 const tls = require('tls');
 const crypto = require('crypto');
-
-function loadEnv() {
-  const file = path.join(__dirname, '..', '.env.local');
-  if (!fs.existsSync(file)) return;
-  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
-  }
-}
+const { loadEnv } = require('../lib/env');
 
 // ── wire protocol helpers ──────────────────────────────────────────────
 const int32 = n => { const b = Buffer.alloc(4); b.writeInt32BE(n); return b; };
@@ -199,4 +191,6 @@ async function main() {
   }
 }
 
-main().catch(err => { console.error(`Failed: ${err.message}`); process.exit(1); });
+if (require.main === module) main().catch(err => { console.error(`Failed: ${err.message}`); process.exit(1); });
+
+module.exports = { Client, loadEnv };

@@ -14,7 +14,7 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 
 ## Stack
 
-- **Server:** `server.js`, Node built-ins only (`http`, `fs`, `path`, `child_process`). Serves `public/` and one endpoint, `POST /api/subscribe`.
+- **Server:** `server.js`, Node built-ins only (`http`, `fs`, `path`, `child_process`). Serves `public/` and two endpoints, `POST /api/event` and `POST /api/subscribe`, which write to Supabase.
 - **Frontend:** static HTML, CSS and plain JavaScript in `public/`. No frameworks, bundlers or CDN libraries. Google Fonts only.
 - **Design:** `design.html` holds the tokens (colors in light and dark, fonts, radii, spacing, shadows). `public/css/tokens.css` is a copy of its `:root` blocks: change a value in `design.html` first, then copy it over.
 
@@ -22,9 +22,12 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 
 | Path | What |
 | --- | --- |
-| `server.js` | Static server for `public/` and `POST /api/subscribe` |
-| `lib/subscribe.js` | Validates and stores an email signup |
-| `api/subscribe.js` | The same endpoint as a Vercel function |
+| `server.js` | Static server for `public/`, `POST /api/event`, `POST /api/subscribe` |
+| `public/funnel.json` | Funnel steps and questions: read by the quiz and loaded into the database |
+| `lib/event.js`, `lib/subscribe.js` | Validate and store an event or an email |
+| `lib/supabase.js` | Calls Postgres functions through Supabase REST |
+| `api/event.js`, `api/subscribe.js` | The same endpoints as Vercel functions |
+| `scripts/seed-funnel.js` | Loads `funnel.json` into `funnels` and `funnel_steps` |
 | `db/schema.sql` | Database tables and views |
 | `scripts/db.js` | Runs SQL against Supabase |
 | `start.command`, `start.bat` | Launchers for macOS and Windows |
@@ -69,35 +72,22 @@ Meta Pixel `1801702574890246`, base code in `public/index.html`.
 
 `Lead` uses Meta advanced matching: the browser hashes the lowercased email with SHA-256 and re-inits the pixel with `{ em: <hash> }` right before `Lead`, so Lead and later events carry `ud[em]`. The readable address never goes to Meta.
 
-## Email signups
+## Data flow
 
-The email screen posts `{ email, answers, page }` to `/api/subscribe`. The funnel does not wait for the answer. Submitting the email counts as confirming 18+ and agreeing to the Terms and Privacy Policy; there is no checkbox.
+1. The quiz loads `/funnel.json` (slug `john-35plus`, version 1) and shows its steps.
+2. Every pixel event, plus a `ScreenView` on each screen (database only), is POSTed to `/api/event` with the session id, funnel slug and version, step key, answer codes, value and visit metadata (UTM tags, device).
+3. The email goes to `/api/subscribe`. Submitting it counts as confirming 18+ and agreeing to the Terms and Privacy Policy; there is no checkbox.
+4. The server calls `log_event` / `save_lead` in Postgres (`db/functions.sql`) through Supabase REST with the secret key. Each call creates the session row on first use, so events and leads always have a session.
 
-Each signup is stored as one JSON line:
+The private `limit` answer is stored in our database but sent to Meta as `private`.
 
-```json
-{"email":"name@example.com","session_id":"s_0160dacc-...","created_at":"2026-11-03T16:52:56.654Z","answers":{"age":"45-54","fears":["lose"],"limit":"50","age_confirmed":true},"page":"/","user_agent":"..."}
-```
+**Changing the funnel:** edit `public/funnel.json`, bump `version` if the steps or questions changed, then run `node scripts/seed-funnel.js`. Sessions keep pointing at the version they saw.
 
-- **Locally:** appended to `data/subscribers.jsonl`. The folder is in `.gitignore`, so emails never reach git.
-- **On Vercel:** the disk is read-only, so set `SUBSCRIBE_WEBHOOK_URL` in Project Settings → Environment Variables. Every signup is POSTed there as JSON. Without it, `/api/subscribe` answers 503 and signups are lost.
-
-The simplest webhook is a Google Sheet: Extensions → Apps Script, paste the code below, Deploy → New deployment → Web app, execute as Me, access Anyone, then copy the web app URL into `SUBSCRIBE_WEBHOOK_URL`.
-
-```js
-function doPost(e) {
-  const d = JSON.parse(e.postData.contents);
-  SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
-    .appendRow([d.created_at, d.email, JSON.stringify(d.answers), d.page, d.user_agent]);
-  return ContentService.createTextOutput('ok');
-}
-```
-
-The same variable also works locally: `SUBSCRIBE_WEBHOOK_URL=https://... node server.js` writes to the file and the sheet.
+**Env vars** (`.env.local` locally, Project Settings on Vercel): `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY` for the API; `POSTGRES_URL_NON_POOLING` for the scripts.
 
 ## Database
 
-Supabase Postgres, schema in `db/schema.sql` (applied 2026-11-04): `funnels`, `funnel_steps`, `sessions`, `events`, `leads`, plus views `session_progress` (furthest step per session) and `session_answers` (answers with labels). RLS is on with no policies: only the server's secret key can read or write.
+Supabase Postgres, schema in `db/schema.sql` and write functions in `db/functions.sql` (both applied 2026-11-04): `funnels`, `funnel_steps`, `sessions`, `events`, `leads`, plus views `session_progress` (furthest step per session) and `session_answers` (answers with labels). RLS is on with no policies, and `log_event` / `save_lead` can only be executed by the service role: only the server's secret key can read or write.
 
 Run SQL without psql or npm:
 

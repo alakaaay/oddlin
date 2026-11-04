@@ -1,9 +1,46 @@
-/* Funnel events go to the Meta Pixel (loaded in <head>) and to dataLayer for a future GTM / GA4 setup.
-   Every event carries session_id (set in <head>), so one visitor's path can be followed step by step. */
-function track(type, name, params) {
+/* Every event goes to three places:
+   - the Meta Pixel (loaded in <head>) for ads,
+   - dataLayer for a future GTM / GA4 setup,
+   - our database through /api/event, tied to the session, the funnel version and the current step.
+   db.answer carries the real answer codes for the database, even on steps hidden from Meta. */
+function track(type, name, params, db) {
   const data = Object.assign({ session_id: window.oddlinSession }, params || {});
   try { window.fbq(type, name, data); } catch (e) {}
   (window.dataLayer = window.dataLayer || []).push(Object.assign({ event: name }, data));
+  logEvent(name, db || {}, data.value);
+}
+
+/* Visit metadata, read once per tab from the ad link and the screen; the server keeps it on the session row */
+const META = (function () {
+  const key = 'oddlin_meta';
+  try { const saved = JSON.parse(sessionStorage.getItem(key)); if (saved) return saved; } catch (e) {}
+  const q = new URLSearchParams(location.search);
+  const ua = navigator.userAgent;
+  const device = /iPad|Tablet/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'tablet'
+    : /Mobi|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop';
+  const meta = { utm_source: q.get('utm_source'), utm_campaign: q.get('utm_campaign'), utm_content: q.get('utm_content'), device };
+  try { sessionStorage.setItem(key, JSON.stringify(meta)); } catch (e) {}
+  return meta;
+})();
+
+/* Fire-and-forget POST to our API; keepalive lets it finish even as the screen changes */
+function post(url, body) {
+  try {
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+
+function logEvent(name, db, value) {
+  if (!FUNNEL || !STEPS) return;
+  post('/api/event', {
+    session_id: window.oddlinSession,
+    funnel: FUNNEL,
+    step_key: db.step || STEPS[state.idx].id,
+    event_name: name,
+    answer: db.answer || null,
+    value: value ?? null,
+    meta: META
+  });
 }
 
 /* Commerce events carry content_ids and content_type so Meta can match them to a catalog.
@@ -16,17 +53,9 @@ function product(ids, name, value) {
   return params;
 }
 
-/* Email goes to our server (/api/subscribe) with the quiz answers. The funnel never waits on it:
-   keepalive lets the request finish even as the screen changes. */
+/* Email goes to our database (/api/subscribe → leads). The funnel never waits on it. */
 function saveEmail(email) {
-  try {
-    fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, session_id: window.oddlinSession, answers: state.ans, page: location.pathname }),
-      keepalive: true
-    }).catch(() => {});
-  } catch (e) {}
+  post('/api/subscribe', { email, session_id: window.oddlinSession, funnel: FUNNEL, meta: META });
 }
 
 /* Meta advanced matching: re-init the pixel with the email so Lead and later events carry it.
@@ -52,19 +81,11 @@ function trackAnswer(s, value, question = s.q, options = s.options) {
     question: String(question || '').replace(/<[^>]+>/g, ''),
     answer: s.private ? 'private' : codes.join(','),
     answer_label: s.private ? 'private' : codes.map(label).join(', ')
-  });
+  }, { answer: codes });
 }
 
 const DISCLAIMER = 'Education only, not financial advice. Prediction markets involve risk of loss.';
 const PROMO_MIN = 10;
-
-const EVENTS = [
-  { v: 'fed', label: 'The Fed and interest rates' },
-  { v: 'inflation', label: 'Inflation and gas prices' },
-  { v: 'jobs', label: 'Jobs and the economy' },
-  { v: 'weather', label: 'Weather' },
-  { v: 'elections', label: 'Elections' }
-];
 
 /* 4-week billing: 13 payments a year instead of 12. Most popular sits on the middle plan. */
 const PLANS = [
@@ -73,36 +94,10 @@ const PLANS = [
   { id: 'w12', name: '12-week plan', full: 69, days: 84, every: 'every 12 weeks' }
 ];
 
-const STEPS = [
-  { id: 'landing', type: 'landing' },
-  { id: 'age', type: 'single', q: 'How old are you?', options: [
-    { v: '35-44', label: '35 to 44' }, { v: '45-54', label: '45 to 54' }, { v: '55+', label: '55 or older' }, { v: 'under35', label: 'Under 35' } ] },
-  { id: 'missed', type: 'multi', q: 'Which of these did you sit out?', hint: 'Pick all that apply.', options: [
-    { v: 'crypto', label: 'Bitcoin and crypto' }, { v: 'meme', label: 'Meme stocks like GameStop' },
-    { v: 'tech', label: 'The Tesla and Nvidia run' }, { v: 'housing', label: 'The housing boom' }, { v: 'none', label: 'None of these' } ] },
-  { id: 'fact_late', type: 'fact' },
-  { id: 'fears', type: 'multi', max: 2, q: 'What holds you back?', hint: 'Pick up to two.', options: [
-    { v: 'how', label: "I don't get how it works" }, { v: 'lose', label: "I'm afraid to lose money" },
-    { v: 'gambling', label: 'It feels like gambling' }, { v: 'trust', label: "I don't know which app to trust" } ] },
-  { id: 'experience', type: 'single', q: 'Have you ever traded on an event?', options: [
-    { v: 'never', label: 'Never' }, { v: 'once', label: 'Once or twice' }, { v: 'some', label: 'A few times' } ] },
-  { id: 'fact_ticket', type: 'fact' },
-  { id: 'events', type: 'multi', q: 'Which events would you follow?', hint: 'No sports. Only events that touch your money.', options: EVENTS },
-  { id: 'time', type: 'single', q: 'How much time can you give it a day?', options: [
-    { v: '5', label: '5 minutes' }, { v: '10', label: '10 minutes' }, { v: '15', label: '15 minutes or more' } ] },
-  { id: 'limit', type: 'single', private: true, q: 'When you go live, what monthly limit feels safe?', hint: 'You can change it later. Trades above it are blocked.', options: [
-    { v: '0', label: 'Practice only for now' }, { v: '50', label: 'Up to $50' }, { v: '200', label: 'Up to $200' }, { v: '500', label: 'Up to $500' } ] },
-  { id: 'st_practice', type: 'statement', q: "I'd rather practice first than risk real money." },
-  { id: 'email', type: 'email' },
-  { id: 'loader', type: 'loader' },
-  { id: 'plan', type: 'plan' },
-  { id: 'scratch', type: 'scratch' },
-  { id: 'paywall', type: 'paywall' },
-  { id: 'upsell', type: 'crosssell' },
-  { id: 'welcome', type: 'done' }
-];
+/* Steps and questions come from /funnel.json: the same file is loaded into the database
+   (node scripts/seed-funnel.js), so screen text and stored answers always match. */
+let FUNNEL = null, STEPS = null, EVENTS = [], EMAIL_IDX = -1;
 const Q_START = 1;
-const EMAIL_IDX = STEPS.findIndex(s => s.id === 'email');
 
 const fresh = () => ({ idx: 0, ans: {}, hist: [], plan: 'w4', email: '', upsell: false, promoUntil: 0, code: '' });
 let state = fresh();
@@ -154,6 +149,7 @@ function render() {
   chrome();
   $('#main').innerHTML = `<section class="screen">${RENDER[s.type].html(s)}</section>`;
   RENDER[s.type].bind && RENDER[s.type].bind(s);
+  logEvent('ScreenView', {}); // database only, never sent to Meta
   window.scrollTo(0, 0);
   const h = $('#main h1, #main h2'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
 }
@@ -259,7 +255,7 @@ const RENDER = {
   },
   statement: {
     html: s => `<div class="eyebrow">Do you agree?</div><blockquote class="quote">“${s.q}”</blockquote>
-      <div class="opts row3">${['Disagree', 'Not sure', 'Agree'].map(v => `<button class="opt" data-v="${v}" aria-pressed="${state.ans[s.id] === v}"><span>${v}</span><span class="tick"></span></button>`).join('')}</div>`,
+      <div class="opts row3">${s.options.map(o => `<button class="opt" data-v="${o.v}" aria-pressed="${state.ans[s.id] === o.v}"><span>${o.label}</span><span class="tick"></span></button>`).join('')}</div>`,
     bind: bindSingle
   },
   email: {
@@ -461,8 +457,22 @@ const RENDER = {
   }
 };
 
-function start(d) {
-  if (d && d.ans) state = Object.assign(fresh(), d);
-  render();
+/* Loads the funnel definition, maps it to the shape the screens use, then shows the first screen */
+async function start() {
+  try {
+    const res = await fetch('/funnel.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const f = await res.json();
+    FUNNEL = { slug: f.slug, version: f.version };
+    STEPS = f.steps.map(s => ({
+      id: s.key, type: s.type, q: s.question, hint: s.hint, max: s.max, private: !!s.private,
+      options: s.options && s.options.map(o => ({ v: o.code, label: o.label }))
+    }));
+    EVENTS = (STEPS.find(s => s.id === 'events') || {}).options || [];
+    EMAIL_IDX = STEPS.findIndex(s => s.id === 'email');
+    render();
+  } catch (e) {
+    $('#main').innerHTML = '<section class="screen"><h2>Something went wrong</h2><p class="lede">The quiz could not load. Refresh the page to try again.</p></section>';
+  }
 }
 start();
