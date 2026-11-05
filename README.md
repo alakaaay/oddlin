@@ -33,6 +33,7 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `start.command`, `start.bat` | Launchers for macOS and Windows |
 | `design.html` | Design tokens, open it in a browser to see them |
 | `public/quiz/index.html` | Quiz markup and the Meta Pixel base code, served at `/quiz` |
+| `public/app/` | App MVP skeleton at `/app`: Learn path (home), AI Coach, Simulator, Leaderboard, Profile. Demo data only, progress in localStorage, no pixel |
 | `vercel.json` | Redirects `/` to `/quiz` on Vercel |
 | `public/css/tokens.css` | Tokens as CSS variables |
 | `public/css/app.css` | Quiz styles |
@@ -86,6 +87,32 @@ The private `limit` answer is stored in our database but sent to Meta as `privat
 **Changing the funnel:** edit `public/funnel.json`, bump `version` if the steps or questions changed, then run `node scripts/seed-funnel.js`. Sessions keep pointing at the version they saw.
 
 **Env vars** (`.env.local` locally, Project Settings on Vercel): `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY` for the API; `POSTGRES_URL_NON_POOLING` for the scripts.
+
+## App accounts
+
+The quiz paywall (`Start my plan`) calls `POST /api/purchase`, which creates a row in `users` (status `pending`) for the email left in the quiz, with the quiz answers as the profile (events → topics, time → minutes, experience → level) and `onboarded = true`. Only emails with a quiz lead are accepted. No payment is taken.
+
+The first screen of `/app` always asks **I'm new here** or **I already have an account**. The quiz email is prefilled on the email step when the quiz ran on the same device.
+- **New here**: a light funnel in the app: name → topics → minutes a day → level → plan (same three plans; 50% off the first payment with a 10-minute timer that starts on the plan screen, then full prices; auto-renew disclosure; no payment taken in the beta) → email → code → password → lesson 1. Server action `signup` creates the account through `signup_app_user`; an email that already has an active account goes to the password step instead.
+
+Sign-in to `/app` (`POST /api/auth`, one endpoint with an `action`, logic in `lib/auth.js`, SQL in `db/auth.sql`):
+- **pending** user: email → 6-digit code by email (10 min, 5 tries, 60 s between sends) → new password → status `active` → lesson 1 opens right away. The in-app onboarding (name, topics, minutes a day, level) runs only for an account without quiz answers.
+- **active** user: email → password (5 wrong tries lock the account for 15 min). After a wrong password a "Forgot password?" link appears: email code → new password → signed in; every other session is signed out.
+- Emails are sent only for these two cases (first sign-in, forgotten password). The quiz signup and purchase send nothing.
+- Unknown email: "No plan for this email" with a link to the quiz.
+- Stored as hashes only: codes and tokens as HMAC-SHA256 (`AUTH_SECRET`, falls back to a hash of the Supabase secret key), passwords as scrypt. The session token (30 days) lives in the browser's localStorage. Log out is in Settings.
+- The SQL functions are revoked from `anon` and `authenticated`, so the public Supabase key can't call them.
+- **Progress lives in the database** (`user_progress`: one JSON document per user plus XP): lessons, quizzes, stars, XP, coins, streak and freezes, calendar, badges, chests, gifts, bonus timer, avatar, theme, trades, coach chat. The app saves locally at once and to the server 1.2 s after the last change (`progress_save`); on sign-in the server copy wins (`progress_load`), and a new account takes what the device has. Last write wins between devices. The client sends the whole document, so XP is not tamper-proof yet.
+- **Ranks**: 10 ranks by XP, each step bigger than the last: Rookie 0, Learner 100, Apprentice 250, Analyst 475, Strategist 800, Forecaster 1,250, Expert 1,850, Master 2,650, Grandmaster 3,700, Oracle 5,100. `RANKS` in `public/app/app.js` and `RANK_XP` in `lib/auth.js` must match. A ranks screen opens from the profile and the leaderboard.
+- **Leaderboard** shows only players of your rank (`leaderboard` action, top 30 by XP in your XP band). Practice players fill the league up to 10 rows until enough real players join.
+
+## Email
+
+`lib/mail.js` sends the sign-in and password-reset codes, nothing else. There is no public send endpoint. `welcomeEmail()` is kept in the module but is not sent anywhere.
+
+- Env: `GMAIL_USER` + `GMAIL_APP_PASSWORD` (Gmail SMTP, `lib/smtp.js`, any recipient within Gmail's daily limit; used first when set), or `RESEND_API_KEY` with optional `MAIL_FROM`. All server only.
+- Without a verified domain Resend only sends from `onboarding@resend.dev` to your own Resend account email. Real recipients need a verified domain and an unsubscribe link in non-transactional emails.
+- Test: `node scripts/send-test-email.js you@example.com`
 
 ## Database
 
