@@ -346,7 +346,7 @@ const RENDER = {
       setCta([{ label: 'Get my plan', onClick: submit }]);
     }
   },
-  /* Magic page, as in Tactiv: three bars, each stops once for a popup question from funnel.json
+  /* Magic page: three bars, each stops once for a popup question from funnel.json
      (type "popup"), then runs on. Long on purpose: the lecture benchmark says a longer loader converts better. */
   loader: {
     html: () => `
@@ -545,6 +545,11 @@ const RENDER = {
         const p = plan();
         // No money is taken, so Meta gets value 0 (no fake revenue in Ads Manager); the database keeps the price
         track('track', 'Purchase', Object.assign(product([planId(p)], p.name, 0), { plan_price: priceOf(p), promo: promoOn() }), { value: priceOf(p) });
+        // Creates the app account (status pending) for the quiz email with the quiz answers as its profile; the app asks for this email on first sign-in
+        if (state.email) {
+          post('/api/purchase', { email: state.email, session_id: window.oddlinSession, plan: planId(p), answers: { events: state.ans.events, time: state.ans.time, experience: state.ans.experience } });
+          try { localStorage.setItem('oddlin_signup_email', state.email); } catch (e) {}
+        }
         next();
       } }]);
     }
