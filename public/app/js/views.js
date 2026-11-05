@@ -4,6 +4,7 @@ import { ALL, CHEST, COURSE, TEST_UNLOCK, UPCOMING, nextNode } from './course.js
 import { AVG_MIN, BADGES, LEARNERS, level } from './progression.js';
 import { fmtDate } from './share.js';
 import { boardTab } from './board.js';
+import { COACH_HELLO, COACH_SUGGEST, coachBusy } from './coach.js';
 import { simView, stats } from './sim.js';
 import { S } from './state.js';
 import { $, ICON, esc } from './util.js';
@@ -68,7 +69,7 @@ export const VIEWS = {
 
   ai() {
     const st = stats();
-    const chat = S.chat.length ? S.chat : [{ me: false, text: 'Hi! I’m your coach. I look at your predictions and show where your odds drift from reality. Ask me anything about a market or a lesson.' }];
+    const chat = S.chat.length ? S.chat : [{ me: false, text: COACH_HELLO }];
     return `<section class="view">
       <div><p class="eyebrow">AI Coach</p><h1>How sharp are your odds?</h1></div>
       <div class="score">
@@ -77,10 +78,10 @@ export const VIEWS = {
         <div><b>${st.n ? st.brier.toFixed(2) : '–'}</b><span class="small muted">Brier score</span></div>
       </div>
       <p class="disc">Brier score: 0 is perfect, 0.25 is a coin flip. Lower is better.</p>
-      <div class="chat" id="chat">${chat.map(m => `<div class="msg ${m.me ? 'me' : 'bot'}">${esc(m.text)}</div>`).join('')}</div>
-      <div class="sugg">${['Review my last call', 'What moves Fed odds?', 'Am I overconfident?'].map(q => `<button data-ask="${esc(q)}">${esc(q)}</button>`).join('')}</div>
-      <form class="ask" id="askf"><input id="askq" placeholder="Ask your coach" autocomplete="off" aria-label="Ask your coach"><button class="btn" aria-label="Send">↑</button></form>
-      <p class="disc">Demo answers. Educational only, not financial advice.</p>
+      <div class="chat" id="chat" aria-live="polite">${chat.map(m => `<div class="msg ${m.me ? 'me' : 'coach'}">${esc(m.text)}</div>`).join('')}${coachBusy ? '<div class="msg coach typing" aria-label="Coach is typing"><i></i><i></i><i></i></div>' : ''}</div>
+      <div class="sugg">${COACH_SUGGEST.map(q => `<button data-ask="${esc(q)}" ${coachBusy ? 'disabled' : ''}>${esc(q)}</button>`).join('')}</div>
+      <form class="ask" id="askf"><input id="askq" placeholder="Ask about a lesson or your trades" autocomplete="off" maxlength="500" aria-label="Ask your coach"><button class="btn" aria-label="Send" ${coachBusy ? 'disabled' : ''}>↑</button></form>
+      <p class="disc">The coach only knows the Oddlin course and your demo trades. Educational only, not financial advice.</p>
     </section>`;
   },
 

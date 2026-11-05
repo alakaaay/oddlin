@@ -1,0 +1,72 @@
+{
+ "days": [
+  {
+   "day": 1,
+   "title": "How it works, and why it isn’t gambling",
+   "nodes": [
+    {
+     "id": "d1l1",
+     "kind": "lesson",
+     "title": "A price is a probability",
+     "text": "Welcome! Let’s start simple. A prediction market asks one yes-or-no question about the future. For example: will the Fed cut interest rates in December?\nPick a side: YES or NO. Think it’ll happen? Buy YES. Think it won’t? Buy NO. That’s the whole idea. Each piece you buy is called a contract.\nEvery contract has a price. Prices go from 1¢ to 99¢. Right now, YES on the Fed question costs 62¢. Let’s see what that number means.\nThe price is like a vote count. 62¢ means the crowd thinks there’s about a 62% chance. Just read cents as percent. Easy, right?\nCheap means unlikely. Pricey means likely. 10¢? The crowd thinks it’s a long shot. 90¢? Almost sure. But almost sure is still not certain.\nNews moves the price. A surprise inflation number or a Fed speech can push the price up or down in minutes. Prices change as people change their minds.\nThe crowd isn’t always right. Something priced at 62% still fails about 4 times out of 10. Your job is to spot when the crowd is too high or too low.\nPractice with play money first. Every trade in Oddlin uses play money. Make mistakes for free, learn how prices move and build your own track record.\nQ: YES costs 30¢. What chance does the market give? Answer: About 30%. Read cents as percent: 30¢ ≈ 30%.\nQ: A contract costs 85¢. What does the crowd think? Answer: Likely, but not certain. 85% is high, but only 100% would be certain."
+    },
+    {
+     "id": "d1l2",
+     "kind": "lesson",
+     "title": "$1 or $0: your max loss is fixed",
+     "text": "Every market has an end date. On that day we get a clear answer. Did the Fed cut rates or not? It’s yes or no, nothing in between.\nRight answer? You get $1. Each winning contract pays exactly $1. Held YES and it happened? $1 each. Held NO and it didn’t happen? Also $1 each.\nWrong answer? You get $0. Losing contracts pay nothing. That’s the worst case. No debt, no surprise bills. A contract can’t drop below zero.\nWhat you pay is the most you can lose. Buy 10 YES at 62¢ and you pay $6.20. If you’re wrong, you lose $6.20. Not a cent more.\nYour best case is fixed too. Those 10 contracts pay $10 at most. You paid $6.20, so the most you can make is $3.80.\nCheap contracts: big payout, rare win. A 10¢ contract pays $1 if it wins. That’s ten times your money. But the crowd says it happens about 1 time in 10.\nPricey contracts: small payout, often. A 90¢ contract earns just 10¢ when it wins. One loss costs 90¢ and wipes out nine wins.\nCheck two numbers before every trade. Max loss and max payout. Oddlin shows both on every ticket. Look at them before you tap Buy. Every single time.\nPick your comfort zone first. Before a trade, decide how much you’re okay losing on that idea. Then buy only as many contracts as fit that amount.\nStart small. Seriously. Small trades keep mistakes cheap. With play money you can try ideas, see what happens and learn without any stress.\nQ: You buy 20 YES at 40¢. What’s your max loss? Answer: $8. 20 × $0.40 = $8. That’s what you paid.\nQ: You hold NO and the event does NOT happen. What does each NO pay? Answer: $1. NO wins when it doesn’t happen, and winners pay $1.\nQ: You buy 10 YES at 70¢. What’s the most you can make? Answer: $3. $10 payout − $7 paid = $3."
+    },
+    {
+     "id": "d1l3",
+     "kind": "lesson",
+     "title": "Odds, not luck",
+     "text": "Wait, isn’t this gambling? Fair question! Both involve money and an uncertain result. The difference is how you decide and what you’re deciding on.\nCasinos are built to beat you. Roulette and slots are designed so the house wins over time. No amount of research changes how a wheel spins.\nReal events leave clues. Inflation, jobs and Fed decisions come with data, official statements and history. Read the clues well and your odds get better.\nThere’s no house here. On an exchange, another person takes the other side of your trade. The price is just where buyers and sellers meet.\nGood judgment can be measured. Say 70% on lots of events, and about 7 in 10 should happen. Track that, and you’ll know if your instincts are actually good.\nOne trade proves nothing. Any single call can go wrong, even with great reasoning. Skill shows up over many calls. Judge yourself on dozens, not one.\nGamblers chase. Forecasters adjust. After a loss, a gambler bets bigger to win it back. A forecaster checks the data, updates the estimate and moves on calmly.\nSome markets are regulated. In the US, Kalshi is an exchange regulated by the CFTC, the agency that oversees futures markets. The rules of each market are public.\nFour simple rules. Trade only when you have a reason. Know your max loss. Never chase losses. Write down every call and how it turned out.\nThat’s what Oddlin trains. You make calls with play money, get an accuracy score and see where your judgment is strong or weak. All before any real decision.\nQ: What makes forecasting different from a slot machine? Answer: You can use data to judge the odds. Real events leave clues you can study. A slot machine doesn’t.\nQ: You lost a trade that had solid reasoning. What’s the forecaster move? Answer: Review the data and keep sizes small. One loss doesn’t prove you wrong. Review, update, stay small."
+    },
+    {
+     "id": "d1r",
+     "kind": "review",
+     "title": "Day 1 quiz",
+     "text": "Q: A YES contract costs 45¢. What chance does the market give? Answer: About 45%. Read cents as percent.\nQ: A contract costs 90¢. What does that mean? Answer: Very likely, not certain. Only 100% would be certain.\nQ: What does a winning contract pay at the end? Answer: $1. Every winning contract pays $1.\nQ: You buy 10 YES at 62¢. What’s your max loss? Answer: $6.20. 10 × $0.62 = $6.20, what you paid.\nQ: You buy 10 YES at 62¢ and it happens. What’s your profit? Answer: $3.80. $10 back for $6.20 paid: $3.80 profit.\nQ: A 10¢ YES contract wins. What does it pay? Answer: $1. Every winner pays $1, whatever you paid.\nQ: On an exchange, who takes the other side of your trade? Answer: Another trader. Buyers and sellers meet. There is no house.\nQ: What’s the best way to judge your forecasting skill? Answer: Track accuracy over many calls. Skill shows over many calls, not one.\nQ: After a loss, what does a forecaster do? Answer: Reviews the data and adjusts. Adjust calmly. Never chase.\nQ: A price moves from 40¢ to 60¢. What does that tell you? Answer: The crowd thinks YES got more likely. Prices follow the crowd’s current odds."
+    }
+   ]
+  },
+  {
+   "day": 2,
+   "title": "Your read vs the crowd",
+   "nodes": [
+    {
+     "id": "d2l1",
+     "kind": "lesson",
+     "title": "YES, NO and selling early",
+     "text": "YES and NO are a pair. They’re two sides of the same question. When YES becomes more likely, its price goes up and the NO price goes down.\nTogether they make about $1. YES at 70¢ means NO is about 30¢. Tiny gaps happen because buyers pay a bit more than sellers get.\nThink it won’t happen? Buy NO. If you think a Fed cut is unlikely, you don’t have to sit it out. Buy NO. It pays $1 if there’s no cut.\nYou can leave any time. You don’t have to wait until the end. You can sell your contracts at the current price whenever you like.\nSelling early can lock in a gain. Bought YES at 40¢ and now it’s 55¢? Sell, and you keep 15¢ per contract, no matter what happens next.\nIt can also limit a loss. Price fell from 40¢ to 25¢? Selling now means you lose 15¢ per contract instead of the full 40¢.\nWhy sell early? Maybe news changed your mind. Maybe you want the money for a better idea. Or you just like locking in a win.\nThe spread is a small hidden cost. Buyers pay a little more than sellers get. On busy markets the gap is tiny. On quiet ones it can eat your edge.\nWatch the moves, not just the end. Lots of traders never wait for the final answer. They follow how the odds react to news and trade those moves.\nTry both in the simulator. Hold one trade until the end. Sell another one early. Then compare what happened and which choice fit your thinking.\nQ: YES costs 70¢. About what does NO cost? Answer: 30¢. YES + NO ≈ $1.\nQ: You bought YES at 40¢. Now it’s 55¢. Profit if you sell one? Answer: 15¢. 55¢ − 40¢ = 15¢."
+    },
+    {
+     "id": "d2l2",
+     "kind": "lesson",
+     "title": "Make your own odds",
+     "text": "Guess first, peek later. If you see the price first, it sticks in your head. Write down your own guess before you look at what the crowd says.\nStart with history. How often did this happen before? If the Fed cut at 3 of its last 10 meetings, about 30% is a fair place to start.\nThen adjust with fresh news. Inflation cooling? Weak jobs report? Fed officials hinting? Each clue can nudge your number up or down from that start.\nSay a number, not a feeling. “75%” beats “probably”. A number can be checked later and teach you something. A vague feeling can’t.\nNow compare with the crowd. You say 75%. The market says 62%. That 13-point gap is where an opportunity might be hiding.\nA gap isn’t proof. The crowd often knows something you missed. A big gap means: double-check your thinking before you trade.\nExpected value: the gap in money. The formula is: your chance × $1 − price. It tells you what one contract is worth to you, if your odds are right.\nLet’s try it. You think 75%. YES costs 62¢. So 0.75 × $1 − 62¢ = +13¢ per contract. Positive means it looks cheap to you.\nNegative? Skip it. You think 40%, YES costs 55¢. That’s −15¢. By your numbers YES is overpriced. Skip it, or take a look at NO.\nIt’s an average, not a promise. Even a good call can lose. Expected value pays off over many calls where your odds are better than the crowd’s.\nTiny edge? Tiny trade. A 2-point gap is easy to get wrong. Keep trades small unless your reasoning is strong and the gap is big.\nThis is the Oddlin habit. Guess, compare, calculate, decide. Repeat it on every market, and your accuracy score will show if it’s working.\nQ: You think 70%. YES costs 50¢. What does the math say? Answer: YES looks cheap. It’s worth 70¢ to you and costs 50¢.\nQ: You think 60%. YES costs 50¢. Expected value per contract? Answer: +10¢. 0.60 × $1 − 50¢ = +10¢.\nQ: Why write your guess before looking at the price? Answer: So the price doesn’t anchor you. Seeing a number first pulls your guess toward it."
+    },
+    {
+     "id": "d2l3",
+     "kind": "lesson",
+     "title": "Are your odds any good?",
+     "text": "70% is a promise you can check. If your 70% calls come true about 70% of the time, you’re calibrated. That’s the real test of good judgment.\nMost beginners are too sure. They say 90% for things that happen 70% of the time. Feeling confident is nice, but it costs you over many calls.\nSome play it too safe. They say 50% on everything. They’re rarely embarrassed, but they never find the spots where the crowd is clearly wrong.\nThe Brier score keeps you honest. It compares your number with what happened. 0 is perfect. 0.25 is what you’d get by always saying 50%.\nYou said 80%, and it happened. Your score for that call: (0.8 − 1)² = 0.04. That’s close to zero, which is great.\nYou said 80%, and it didn’t. Now it’s (0.8 − 0)² = 0.64. Ouch. Confident misses hurt a lot, so it pays to be honest about doubt.\nLook at the average. One bad call won’t define you. After 20 or 30 calls, your average starts telling you something real.\nUse levels you can explain. 60% when you lean yes. 80% when the data clearly points one way. 95% only when it’s nearly settled.\nYour AI Coach keeps score. Every settled call updates your score. The coach shows where you drift, by topic and by how confident you were.\nYour first-month goal. Make at least 20 play-money calls and get your Brier score under 0.20. That beats guessing and shows real skill.\nQ: Your 90% calls come true 6 times in 10. You are… Answer: Too sure (overconfident). You said 90%, reality said 60%.\nQ: Which Brier score is best? Answer: 0.12. Lower is better. 0.12 beats always saying 50% (0.25)."
+    },
+    {
+     "id": "d2r",
+     "kind": "review",
+     "title": "Day 2 quiz",
+     "text": "Q: YES costs 62¢. About what does NO cost? Answer: 38¢. YES + NO ≈ $1.\nQ: You bought 4 YES at 50¢. Now it’s 65¢. Profit if you sell all 4? Answer: 60¢. 4 × 15¢ = 60¢.\nQ: You think 75%. YES costs 62¢. What does the math say? Answer: YES looks cheap. 75¢ of value for 62¢.\nQ: You think 80%. YES costs 70¢. Expected value per contract? Answer: +10¢. 0.80 − 0.70 = +10¢.\nQ: You think 20%. YES costs 35¢. Expected value of YES? Answer: −15¢. 0.20 − 0.35 = −15¢.\nQ: Same market: you think NO is 80% likely. NO costs 65¢. Expected value of NO? Answer: +15¢. 0.80 − 0.65 = +15¢.\nQ: Why write your guess before checking the price? Answer: To avoid anchoring on it. Seeing a number first pulls your guess toward it.\nQ: What does “calibrated” mean? Answer: Your 70% calls happen about 70% of the time. It compares what you said with what happened.\nQ: You said 80% and it didn’t happen. Brier score for that call? Answer: 0.64. (0.8 − 0)² = 0.64.\nQ: Price 50¢, your odds 52%. What’s the sensible move? Answer: Skip or go very small: the edge is thin. A 2-point edge is easy to get wrong."
+    }
+   ]
+  }
+ ],
+ "upcoming": [
+  "Reading a Fed statement",
+  "Inflation data in 5 minutes",
+  "Jobs day",
+  "When to sell early",
+  "Elections and polls",
+  "Your first week in review"
+ ]
+}

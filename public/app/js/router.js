@@ -7,9 +7,7 @@ import { $ } from './util.js';
 import { VIEWS } from './views.js';
 
 // Sections still in development: the tab stays visible with a "Soon" tag and opens a placeholder.
-export const SOON = {
-  ai: { icon: '\u2728', title: 'AI Coach is on its way', text: 'Your coach will review your calls, show where your odds drift from reality and answer questions about any market.' },
-};
+export const SOON = {};
 export function soonView(k) {
   const x = SOON[k];
   return `<section class="view soon"><div class="soon-ic">${x.icon}</div><span class="chip">In development</span>
@@ -32,6 +30,6 @@ export function route() {
   if (v === 'learn') { const c = $('.lvl.current'); if (c) c.scrollIntoView({ block: 'center' }); } else window.scrollTo(0, 0);
   if (v === 'board') loadBoard();
   if (v === 'sim') loadSim();
-  if (v === 'ai' && !SOON.ai) { const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
+  if (v === 'ai') { const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
 }
 addEventListener('hashchange', route);

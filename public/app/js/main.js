@@ -1,7 +1,7 @@
 // Entry point: global click handlers and boot.
 import { openAvatar } from './avatar.js';
 import { openChest } from './chest.js';
-import { coachReply } from './coach.js';
+import { COACH_HELLO, coachBusy, coachReply } from './coach.js';
 import { ALL } from './course.js';
 import { adopt, api, gate, getToken, loadProgress, setToken } from './gate.js';
 import { bonusLeft, openGifts, openStreak, paintPerks } from './perks.js';
@@ -42,10 +42,16 @@ document.addEventListener('click', e => {
 document.addEventListener('submit', e => {
   if (e.target.id === 'askf') { e.preventDefault(); const v = $('#askq').value.trim(); if (v) ask(v); }
 });
-function ask(q) {
-  if (!S.chat.length) S.chat.push({ me: false, text: 'Hi! I’m your coach. I look at your predictions and show where your odds drift from reality.' });
-  S.chat.push({ me: true, text: q }, { me: false, text: coachReply(q) });
-  S.chat = S.chat.slice(-20); S.asked++; save(); checkBadges(); route();
+async function ask(q) {
+  if (coachBusy) return;
+  if (!S.chat.length) S.chat.push({ me: false, text: COACH_HELLO });
+  S.chat.push({ me: true, text: q });
+  const pending = coachReply(q); // sets coachBusy, so the screen shows the typing dots
+  route();
+  const text = await pending;
+  S.chat.push({ me: false, text });
+  S.chat = S.chat.slice(-20); S.asked++; save(); checkBadges();
+  if ((location.hash.match(/^#\/(\w+)/) || [])[1] === 'ai') { route(); const f = $('#askq'); if (f) f.focus({ preventScroll: true }); }
 }
 
 applyTheme();

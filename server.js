@@ -16,6 +16,7 @@ const { saveSubscriber } = require('./lib/subscribe');
 const { auth, purchase } = require('./lib/auth');
 const { trade } = require('./lib/trades');
 const { review } = require('./lib/review');
+const { coach } = require('./lib/coach');
 const { listMarkets } = require('./lib/markets');
 
 loadEnv();
@@ -54,7 +55,8 @@ const API = {
   '/api/auth': auth,
   '/api/purchase': purchase,
   '/api/trade': trade,
-  '/api/review': review
+  '/api/review': review,
+  '/api/coach': coach
 };
 
 function api(req, res, handler) {
