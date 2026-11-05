@@ -232,3 +232,11 @@ button:focus-visible, .plan:focus-within, .check:focus-within { outline: 2px sol
 
 @media (prefers-reduced-motion: reduce) { .vs-chart .vs-up { animation: none; stroke-dashoffset: 0; } .screen, .screen > *, .pop, .pop-card, .lbar-track i::after, .btn::after, .live, .scratch canvas, .opt[aria-pressed="true"] .tick { animation: none; } .progress > i { transition: none; } }
 
+
+/* Paywall trust block: safe payment, support, accepted cards */
+.trust { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.trust-l { display: grid; gap: 8px; }
+.trust-i { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); font-size: 13px; line-height: 18px; color: var(--ink); }
+.trust-i svg { width: 20px; height: 20px; flex: none; color: var(--hit); }
+.trust-pay { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; align-content: center; justify-items: center; padding: 10px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
+.trust-pay img { width: 100%; max-width: 44px; height: auto; display: block; }

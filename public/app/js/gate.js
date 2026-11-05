@@ -32,8 +32,8 @@ export const ERR = {
 };
 export const TOPIC_OPTS = ['The Fed', 'Inflation', 'Jobs', 'Elections', 'Economy', 'Weather'];
 export const APP_PLANS = [
-  { id: 'oddlin_w1', name: '1-week plan', price: 9.99, every: 'every week', days: 7 },
-  { id: 'oddlin_w4', name: '4-week plan', price: 29, every: 'every 4 weeks', days: 28, popular: true },
+  { id: 'oddlin_w1', name: '1-week plan', price: 13, every: 'every week', days: 7 },
+  { id: 'oddlin_w4', name: '4-week plan', price: 39, every: 'every 4 weeks', days: 28, popular: true },
   { id: 'oddlin_w12', name: '12-week plan', price: 69, every: 'every 12 weeks', days: 84 }
 ];
 export const usd = n => '$' + (Number.isInteger(n) ? n : n.toFixed(2));
@@ -89,6 +89,13 @@ export function gate(startStep) {
           <span class="small muted">${on ? `<s>${usd(x.price)}</s> ${usd(firstPrice(x))} first, then ${usd(x.price)} ${x.every}` : `${usd(x.price)} ${x.every}`}</span></span>
         <span class="g-pd"><b>${usd(+(firstPrice(x) / x.days).toFixed(2))}</b><span class="small muted">per day</span></span></button>`).join('')}</div>
       <button class="btn gold" data-g="nplan">Start my plan${on ? ` · ${usd(firstPrice(P))}` : ''}</button>
+      <div class="trust" aria-label="Payment and support">
+        <div class="trust-l">
+          <span class="trust-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zm-1.2 13.6-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4z"/></svg>Pay safe &amp; secure</span>
+          <span class="trust-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a8 8 0 0 0-8 8v6a3 3 0 0 0 3 3h2v-7H6v-2a6 6 0 0 1 12 0v2h-3v7h2.5a1 1 0 0 1-1 1H13v2h3.5a3 3 0 0 0 3-3v-.3A3 3 0 0 0 20 17v-6a8 8 0 0 0-8-8z"/></svg>24/7 support</span>
+        </div>
+        <div class="trust-pay">${['applepay:Apple Pay', 'mastercard:Mastercard', 'maestro:Maestro', 'visa:Visa', 'amex:American Express', 'discover:Discover'].map(x => { const [f, n] = x.split(':'); return `<img src="/assets/pay/${f}.svg" alt="${n}" width="40" height="25">`; }).join('')}</div>
+      </div>
       <p class="disc">Today: ${usd(firstPrice(P))}. Renews automatically at ${usd(P.price)} ${P.every} until you cancel. Cancel anytime before the next charge. Beta: no payment is taken yet.</p>`; }
     if (step === 'nemail') body = `<h1>Create your account</h1><p class="muted">We’ll send a 6-digit code to confirm your email.</p>
       ${field('g-email', 'email', 'you@example.com', 'email', `inputmode="email" autocapitalize="off" spellcheck="false" value="${esc(email)}"`)}

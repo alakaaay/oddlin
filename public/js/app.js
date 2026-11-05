@@ -113,8 +113,8 @@ const PROMO_MIN = 10;
 
 /* 4-week billing: 13 payments a year instead of 12. Most popular sits on the middle plan. */
 const PLANS = [
-  { id: 'w1', name: '1-week plan', full: 9.99, days: 7, every: 'every week' },
-  { id: 'w4', name: '4-week plan', full: 29, days: 28, every: 'every 4 weeks', popular: true },
+  { id: 'w1', name: '1-week plan', full: 13, days: 7, every: 'every week' },
+  { id: 'w4', name: '4-week plan', full: 39, days: 28, every: 'every 4 weeks', popular: true },
   { id: 'w12', name: '12-week plan', full: 69, days: 84, every: 'every 12 weeks' }
 ];
 
@@ -523,6 +523,13 @@ const RENDER = {
           </label>`).join('')}
         </div>
         <div class="card"><h3>How billing works</h3><ol class="timeline" id="tl"></ol></div>
+        <div class="trust" aria-label="Payment and support">
+          <div class="trust-l">
+            <span class="trust-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zm-1.2 13.6-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4z"/></svg>Pay safe &amp; secure</span>
+            <span class="trust-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3a8 8 0 0 0-8 8v6a3 3 0 0 0 3 3h2v-7H6v-2a6 6 0 0 1 12 0v2h-3v7h2.5a1 1 0 0 1-1 1H13v2h3.5a3 3 0 0 0 3-3v-.3A3 3 0 0 0 20 17v-6a8 8 0 0 0-8-8z"/></svg>24/7 support</span>
+          </div>
+          <div class="trust-pay">${['applepay:Apple Pay', 'mastercard:Mastercard', 'maestro:Maestro', 'visa:Visa', 'amex:American Express', 'discover:Discover'].map(x => { const [f, n] = x.split(':'); return `<img src="/assets/pay/${f}.svg" alt="${n}" width="40" height="25">`; }).join('')}</div>
+        </div>
         <p class="disc" id="renew"></p>
         <p class="disc">${DISCLAIMER} Oddlin never holds your money.</p>`;
     },
