@@ -1057,8 +1057,8 @@
     layer.onclick = e => {
       if (e.target.closest('[data-close]')) { layer.innerHTML = ''; layer.onclick = null; route(); return; }
       if (e.target.closest('[data-retake]')) {
-        if (!TEST_UNLOCK && !S.done.includes(node.id)) { if (S.balance < QUIZ_RETAKE) return; S.balance -= QUIZ_RETAKE; save(); bump('#balance'); }
-        layer.innerHTML = ''; openLesson(node); return;
+        if (TEST_UNLOCK || S.done.includes(node.id)) { layer.innerHTML = ''; openLesson(node); return; }
+        payRetake(node); return;
       }
       if (e.target.closest('[data-hint]')) { hint = true; draw(); return; }
       const o = e.target.closest('[data-opt]');
@@ -1081,22 +1081,43 @@
     };
     draw();
   }
-  // A failed quiz costs coins to retake; a passed one can be replayed for free
+  // A failed quiz costs coins to retake (after the player agrees in a popup); a passed one can be replayed for free
   function startNode(node) {
     const failed = !TEST_UNLOCK && node.kind === 'review' && !S.done.includes(node.id) && (S.quizTries[node.id] || 0) > 0;
     if (!failed) return openLesson(node);
-    const layer = $('#layer'), can = S.balance >= QUIZ_RETAKE;
-    layer.innerHTML = `<div class="sheet enter" role="dialog" aria-modal="true" aria-label="Retake quiz"><div class="sheet-in">
-      <div class="av-top"><button class="x" data-close aria-label="Close">×</button><span></span><span></span></div>
-      <div class="reward lesson-body"><div class="burst">↻</div><h2>Retake ${esc(node.title)}?</h2>
-        <p class="muted">10 questions, pass mark 8. A retake costs ${QUIZ_RETAKE} coins. You have ${money(S.balance)}.</p></div>
-      <div class="lesson-foot"><button class="btn gold" data-pay ${can ? '' : 'disabled'}><span class="coin" aria-hidden="true">$</span> Retake for ${QUIZ_RETAKE}</button>
-        ${can ? '' : '<p class="disc center">Not enough coins yet. Claim your daily bonus and gifts on the map.</p>'}</div>
-    </div></div>`;
-    layer.onclick = e => {
-      if (e.target.closest('[data-close]')) { layer.innerHTML = ''; layer.onclick = null; return; }
-      if (e.target.closest('[data-pay]') && S.balance >= QUIZ_RETAKE) { S.balance -= QUIZ_RETAKE; save(); bump('#balance'); layer.innerHTML = ''; openLesson(node); }
-    };
+    payRetake(node);
+  }
+  async function payRetake(node) {
+    const ok = await confirmCoins({
+      title: `You didn’t pass ${node.title} yet`,
+      text: `A retake costs ${QUIZ_RETAKE} coins. You need 8 of 10 to pass.`,
+      cost: QUIZ_RETAKE,
+      action: `Spend ${QUIZ_RETAKE} coins and retake`
+    });
+    if (!ok || S.balance < QUIZ_RETAKE) return;
+    S.balance -= QUIZ_RETAKE; save(); bump('#balance');
+    $('#layer').innerHTML = ''; openLesson(node);
+  }
+  // Consent popup before spending coins. Resolves true only when the player taps the spend button.
+  function confirmCoins({ title, text, cost, action }) {
+    return new Promise(resolve => {
+      const m = $('#modal'), can = S.balance >= cost;
+      m.innerHTML = `<div class="modal-back" data-no><div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="m-t" aria-describedby="m-d">
+        <div class="modal-ic"><span class="coin">$</span></div>
+        <h2 id="m-t">${esc(title)}</h2><p id="m-d" class="muted">${esc(text)}</p>
+        <div class="modal-bal"><span>Your coins</span><b class="mono">${money(S.balance)}${can ? ` → ${money(S.balance - cost)}` : ''}</b></div>
+        ${can ? '' : `<p class="feedback miss">You need ${money(cost - S.balance)} more. Claim your daily bonus and gifts on the map.</p>`}
+        <button class="btn gold" data-yes ${can ? '' : 'disabled'}>${esc(action)}</button>
+        <button class="btn ghost" data-no>Not now</button></div></div>`;
+      const close = v => { m.innerHTML = ''; m.onclick = null; document.removeEventListener('keydown', onKey); resolve(v); };
+      const onKey = e => { if (e.key === 'Escape') close(false); };
+      document.addEventListener('keydown', onKey);
+      m.onclick = e => {
+        if (e.target.closest('[data-yes]') && can) return close(true);
+        if (e.target.matches('[data-no]') || e.target.closest('button[data-no]')) close(false);
+      };
+      setTimeout(() => { const b = m.querySelector('[data-yes]:not([disabled])') || m.querySelector('button[data-no]'); if (b) b.focus(); }, 30);
+    });
   }
 
   // ---------- chest opening ----------
