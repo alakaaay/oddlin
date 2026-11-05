@@ -21,7 +21,7 @@ export function route() {
   const name = (location.hash.match(/^#\/(\w+)/) || [])[1];
   const v = VIEWS[name] ? name : 'learn';
   $('#view').innerHTML = SOON[v] ? soonView(v) : VIEWS[v]();
-  const prof = v === 'profile' || v === 'badges', tabOf = v === 'badges' ? 'profile' : v === 'coach' || v === 'scanner' ? 'ai' : v;
+  const prof = v === 'profile' || v === 'badges', tabOf = v === 'badges' ? 'profile' : v === 'coach' || v === 'scanner' || v === 'arbitrage' ? 'ai' : v;
   $('.mark').hidden = prof; $('.stats').hidden = prof; $('.bar-title').hidden = !prof; $('.gear').hidden = v !== 'profile';
   $('.bar-title').textContent = v === 'badges' ? 'Achievements' : 'Profile';
   document.querySelectorAll('.tabs a').forEach(a => a.dataset.tab === tabOf ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));

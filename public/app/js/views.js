@@ -68,16 +68,16 @@ export const VIEWS = {
     </section>`;
   },
 
-  // AI Tools hub: the scanner and the coach are live, arbitrage is a placeholder until its features are defined
+  // AI Tools hub: the scanner and the coach are live; arbitrage opens an explainer with a waitlist checkbox
   ai() {
-    const tool = (t, i) => `<${t.href ? `a href="${t.href}"` : `button data-tool-soon="${esc(t.name)}"`} class="tool-card ${t.cls}${t.href ? '' : ' soon'}" style="--d:${i * 90}ms">
+    const tool = (t, i) => `<a href="${t.href}" class="tool-card ${t.cls}${t.soon ? ' soon' : ''}" style="--d:${i * 90}ms">
         <span class="tool-ic" aria-hidden="true">${t.icon}</span>
         <span class="tool-txt"><b>${t.name}</b><span class="small muted">${t.text}</span></span>
-        ${t.href ? '<span class="tool-live">Live</span><span class="chev" aria-hidden="true">›</span>' : '<span class="tool-soon">Soon</span>'}
-      </${t.href ? 'a' : 'button'}>`;
+        <span class="chev" aria-hidden="true">›</span>
+      </a>`;
     const tools = [
       { name: 'AI Scanner', cls: 'scan', href: '#/scanner', text: 'Daily picks where the price looks too cheap', icon: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" class="ring"/><circle cx="24" cy="24" r="11" class="ring"/><circle cx="24" cy="24" r="4" class="ring"/><path d="M24 24 L24 6 A18 18 0 0 1 39.6 15 Z" class="sweep"/><circle cx="33" cy="17" r="2.2" class="blip b1"/><circle cx="15" cy="30" r="2" class="blip b2"/></svg>` },
-      { name: 'AI Arbitrage', cls: 'arb', text: 'In development', icon: `<svg viewBox="0 0 48 48"><path d="M10 17h24" class="arr a1"/><path d="M28 11l6 6-6 6" class="arr a1"/><path d="M38 31H14" class="arr a2"/><path d="M20 25l-6 6 6 6" class="arr a2"/></svg>` },
+      { name: 'AI Arbitrage', cls: 'arb', href: '#/arbitrage', soon: true, text: 'Same event, two prices. Coming soon', icon: `<svg viewBox="0 0 48 48"><path d="M10 17h24" class="arr a1"/><path d="M28 11l6 6-6 6" class="arr a1"/><path d="M38 31H14" class="arr a2"/><path d="M20 25l-6 6 6 6" class="arr a2"/></svg>` },
       { name: 'AI Coach', cls: 'coach', href: '#/coach', text: 'Ask about any lesson or your own trades', icon: `<svg viewBox="0 0 48 48"><path d="M10 12h28a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H22l-8 7v-7h-4a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4z" class="bubble"/><circle cx="17" cy="23" r="2.4" class="dot d1"/><circle cx="24" cy="23" r="2.4" class="dot d2"/><circle cx="31" cy="23" r="2.4" class="dot d3"/></svg>` }
     ];
     // Hero: a small neural net whose nodes pulse and whose links carry moving sparks
@@ -118,6 +118,39 @@ export const VIEWS = {
   },
 
   scanner() { return scannerView(); },
+
+  // AI Arbitrage (coming soon): the idea in plain words, one example, and a "notify me" button (S.arbInterest, saved with progress)
+  arbitrage() {
+    const on = !!S.arbInterest;
+    return `<section class="view arb-page">
+      <a class="back-link" href="#/ai">‹ AI Tools</a>
+      <div class="arb-hero">
+        <div class="arb-hero-txt"><p class="eyebrow">AI Arbitrage <span class="tool-soon">Soon</span></p><h1>Same event, two prices</h1>
+          <p>Sometimes Kalshi and Polymarket price the same question a little differently. The AI will point it out when that happens.</p></div>
+      </div>
+      <div class="card arb-how"><h3>How it works</h3>
+        <div class="arb-ex">
+          <div class="arb-leg k"><span class="small">Kalshi</span><b>YES</b><span class="arb-px">45¢</span></div>
+          <span class="arb-plus" aria-hidden="true">+</span>
+          <div class="arb-leg p"><span class="small">Polymarket</span><b>NO</b><span class="arb-px">50¢</span></div>
+          <span class="arb-eq" aria-hidden="true">=</span>
+          <div class="arb-leg t"><span class="small">Both sides</span><b>95¢</b><span class="arb-px">not $1</span></div>
+        </div>
+        <ol class="arb-steps">
+          <li>Every event ends in YES or NO, and the right side pays $1.</li>
+          <li>Here both sides together cost 95¢. That 5¢ difference is the price gap.</li>
+          <li>The AI will look for these gaps and check that both sites use the same rules.</li>
+        </ol>
+        <p class="arb-note"><span aria-hidden="true">⚠️</span>Gaps are small, close fast and fees can eat them. If the two sites settle an event differently, both sides can lose. Practice with demo money first.</p>
+      </div>
+      <div class="card arb-soon"><h3>Not ready yet</h3>
+        <p class="muted small">We’re building AI Arbitrage now. Want to try it first?</p>
+        <button class="btn ${on ? 'ghost' : 'gold'} arb-notify" data-arb-notify ${on ? 'disabled' : ''}>${on ? '✓ You’re on the list' : 'Notify me when it’s ready'}</button>
+        ${on ? '<p class="disc center">We’ll let you know in the app when it opens.</p>' : ''}
+      </div>
+      <p class="disc">Educational only, not financial advice.</p>
+    </section>`;
+  },
 
   sim() { return simView(); },
 

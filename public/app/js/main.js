@@ -42,7 +42,15 @@ document.addEventListener('click', e => {
   const bd = e.target.closest('[data-badge]'); if (bd) { openBadge(BADGES.find(b => b.id === bd.dataset.badge)); return; }
   if (e.target.closest('[data-settings]')) { openSettings(); return; }
   if (e.target.closest('[data-billing]')) { openBilling(); return; }
-  const ts = e.target.closest('[data-tool-soon]'); if (ts) { tip(`${ts.dataset.toolSoon} is in development. Coming soon.`); return; }
+  const nb = e.target.closest('[data-arb-notify]');
+  if (nb && !S.arbInterest) {
+    S.arbInterest = new Date().toISOString(); save(); // saved with progress; the team reads it from user_progress
+    nb.disabled = true; nb.classList.replace('gold', 'ghost'); nb.textContent = '✓ You’re on the list'; // in place, no jump to the top
+    nb.insertAdjacentHTML('afterend', '<p class="disc center">We’ll let you know in the app when it opens.</p>');
+    tip('Thanks! We’ll let you know when AI Arbitrage opens.');
+    return;
+  }
+
   if (e.target.closest('[data-coach-plus]')) { buyCoachPlus().then(ok => { if (ok) loadCoachLeft(route); }); return; }
 });
 document.addEventListener('submit', e => {
