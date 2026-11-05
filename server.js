@@ -2,6 +2,7 @@
 // Serves public/ on 127.0.0.1, starting at port 3000 and moving to the next free port if it is taken.
 // POST /api/event and POST /api/subscribe write quiz events and emails to Supabase (lib/event.js, lib/subscribe.js).
 // POST /api/purchase creates the app account after the paywall; POST /api/auth signs in to /app (lib/auth.js).
+// GET /api/markets lists live Kalshi / Polymarket markets; POST /api/trade runs simulator trades (lib/markets.js, lib/trades.js).
 // Supabase keys come from .env.local.
 // Usage: node server.js [--open]   (--open launches the default browser once the server is up)
 
@@ -13,6 +14,8 @@ const { loadEnv } = require('./lib/env');
 const { logEvent } = require('./lib/event');
 const { saveSubscriber } = require('./lib/subscribe');
 const { auth, purchase } = require('./lib/auth');
+const { trade } = require('./lib/trades');
+const { listMarkets } = require('./lib/markets');
 
 loadEnv();
 
@@ -48,7 +51,8 @@ const API = {
   '/api/event': logEvent,
   '/api/subscribe': saveSubscriber,
   '/api/auth': auth,
-  '/api/purchase': purchase
+  '/api/purchase': purchase,
+  '/api/trade': trade
 };
 
 function api(req, res, handler) {
@@ -80,7 +84,20 @@ function api(req, res, handler) {
   });
 }
 
+// GET /api/markets: live markets for the simulator (lib/markets.js caches each upstream URL for 2 minutes)
+async function markets(req, res) {
+  if (req.method !== 'GET') return send(res, 405, 'Method not allowed');
+  try {
+    const q = Object.fromEntries(new URL(req.url, `http://${HOST}`).searchParams);
+    send(res, 200, JSON.stringify(Object.assign({ ok: true }, await listMarkets(q))), TYPES['.json']);
+  } catch (err) {
+    console.error(`/api/markets: ${err.message}`);
+    send(res, 502, JSON.stringify({ ok: false, error: 'markets_unavailable' }), TYPES['.json']);
+  }
+}
+
 function handle(req, res) {
+  if (req.url.split('?')[0] === '/api/markets') return markets(req, res);
   const route = API[req.url.split('?')[0]];
   if (route) return req.method === 'POST' ? api(req, res, route) : send(res, 405, 'Method not allowed');
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');

@@ -3,7 +3,8 @@ import { avatarSVG } from './avatar.js';
 import { ALL, CHEST, COURSE, TEST_UNLOCK, UPCOMING, nextNode } from './course.js';
 import { AVG_MIN, BADGES, LEARNERS, level } from './progression.js';
 import { fmtDate } from './share.js';
-import { MARKETS, simTab, stats, tradeCard } from './sim.js';
+import { boardTab } from './board.js';
+import { simView, stats } from './sim.js';
 import { S } from './state.js';
 import { $, ICON, esc } from './util.js';
 
@@ -83,23 +84,17 @@ export const VIEWS = {
     </section>`;
   },
 
-  sim() {
-    const tab = simTab;
-    const open = S.trades.filter(t => !t.settled), closed = S.trades.filter(t => t.settled);
-    return `<section class="view">
-      <div><p class="eyebrow">Simulator · play money</p><h1>Practice on live events</h1></div>
-      <div class="seg" role="group"><button data-seg="markets" aria-pressed="${tab === 'markets'}">Markets</button><button data-seg="mine" aria-pressed="${tab === 'mine'}">My calls${open.length ? ' (' + open.length + ')' : ''}</button></div>
-      ${tab === 'markets' ? MARKETS.map(m => `<button class="card mkt" data-mkt="${m.id}">
-          <h3>${esc(m.q)}</h3><span class="price">${m.price}¢</span>
-          <span class="meta"><span class="chip">${esc(m.topic)}</span><span class="small muted">${esc(m.src)} · closes ${esc(m.closes)}</span></span>
-        </button>`).join('') + '<p class="disc">Sample prices for the demo. Live Kalshi and Polymarket data comes next.</p>'
-      : (open.length || closed.length ? [...open, ...closed].map(tradeCard).join('') : '<div class="card"><h3>No calls yet</h3><p class="muted small">Pick a market, write your own odds and place a play-money trade.</p></div>')}
-    </section>`;
-  },
+  sim() { return simView(); },
 
   board() {
     const lv = level(S.xp);
-    return `<section class="view">
+    const tabs = `<div class="seg" role="group" aria-label="Leaderboard"><button data-btab="league" aria-pressed="${boardTab === 'league'}">XP league</button><button data-btab="traders" aria-pressed="${boardTab === 'traders'}">Demo traders</button></div>`;
+    if (boardTab === 'traders') return `<section class="view">${tabs}
+      <div><p class="eyebrow">Simulator \u00b7 <span class="demo-tag">DEMO</span> money</p><h1>Top demo traders</h1><p class="muted small">Ranked by profit from closed trades on Kalshi and Polymarket. Everyone starts with $1,000 in demo money.</p></div>
+      <div id="board-rows"><p class="muted small center">Loading traders\u2026</p></div>
+      <p class="disc">Demo money only, never real. Open trades count once they close.</p>
+    </section>`;
+    return `<section class="view">${tabs}
       <button class="league-head" data-ranks style="--rc:${lv.c}"><span class="rank-ic">${lv.icon}</span>
         <span><span class="eyebrow">Your league</span><b>${esc(lv.name)} league</b><span class="small muted">${lv.next ? `${lv.min.toLocaleString('en-US')}–${(lv.next - 1).toLocaleString('en-US')} XP · reach ${lv.next.toLocaleString('en-US')} XP for ${esc(lv.nextName)}` : `${lv.min.toLocaleString('en-US')}+ XP · top rank`}</span></span>
         <span class="chev">›</span></button>

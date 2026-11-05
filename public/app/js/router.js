@@ -1,5 +1,6 @@
 // Hash router for the five tabs, with placeholders for sections still in development.
 import { loadBoard } from './board.js';
+import { loadSim } from './sim.js';
 import { ALL, nextNode } from './course.js';
 import { paintPerks } from './perks.js';
 import { $ } from './util.js';
@@ -8,7 +9,6 @@ import { VIEWS } from './views.js';
 // Sections still in development: the tab stays visible with a "Soon" tag and opens a placeholder.
 export const SOON = {
   ai: { icon: '\u2728', title: 'AI Coach is on its way', text: 'Your coach will review your calls, show where your odds drift from reality and answer questions about any market.' },
-  sim: { icon: '\ud83d\udcc8', title: 'Simulator is on its way', text: 'Soon you\u2019ll practice on live events with play money: set your odds, see your max loss and track how your calls play out.' }
 };
 export function soonView(k) {
   const x = SOON[k];
@@ -31,6 +31,7 @@ export function route() {
   if (cur) { play.dataset.node = cur.id; play.textContent = `Play · Level ${ALL.indexOf(cur) + 1}`; }
   if (v === 'learn') { const c = $('.lvl.current'); if (c) c.scrollIntoView({ block: 'center' }); } else window.scrollTo(0, 0);
   if (v === 'board') loadBoard();
+  if (v === 'sim') loadSim();
   if (v === 'ai' && !SOON.ai) { const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
 }
 addEventListener('hashchange', route);

@@ -2,6 +2,7 @@
 
 export const KEY = 'oddlin_app_v1';
 export const START_BALANCE = 1000;
+export const SIM_START = 1000; // virtual dollars for the simulator, separate from coins
 export const LESSON_REWARD = 100; // play money for finishing a lesson
 export const AV_DEFAULT = { body: 'm', skin: 1, hair: 'short', hairColor: 0, eyes: 'round', facial: 'none', glasses: 'none', shirt: 0, bg: 0 };
 export const $ = (s, r = document) => r.querySelector(s);

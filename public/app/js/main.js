@@ -10,7 +10,7 @@ import { BADGES, checkBadges, openRanks, tip } from './progression.js';
 import { route } from './router.js';
 import { applyTheme, openSettings } from './settings.js';
 import { openBadge } from './share.js';
-import { mkt, openTicket, setSimTab } from './sim.js';
+import { setSimTab } from './sim.js';
 import { S, bump, paintBar, save, settleStreak } from './state.js';
 import { $, BONUS_COINS } from './util.js';
 
@@ -33,16 +33,6 @@ document.addEventListener('click', e => {
     return;
   }
   const sg = e.target.closest('[data-seg]'); if (sg) { setSimTab(sg.dataset.seg); route(); return; }
-  const mk = e.target.closest('[data-mkt]'); if (mk) { openTicket(mkt(mk.dataset.mkt)); return; }
-  const se = e.target.closest('[data-settle]');
-  if (se) {
-    const t = S.trades.find(x => x.id === se.dataset.settle), m = mkt(t.mkt);
-    t.outcome = Math.random() * 100 < m.price; // demo: the event happens with the crowd's probability
-    t.won = (t.side === 'yes') === t.outcome; t.settled = true;
-    if (t.won) { S.balance += t.shares; bump('#balance'); }
-    S.xp += Math.max(0, Math.round(20 * (1 - Math.pow(t.est / 100 - (t.outcome ? 1 : 0), 2) * 4)));
-    save(); checkBadges(); route(); return;
-  }
   const ak = e.target.closest('[data-ask]'); if (ak) { ask(ak.dataset.ask); return; }
   if (e.target.closest('[data-avatar]')) { openAvatar(); return; }
   if (e.target.closest('[data-ranks]')) { openRanks(); return; }
