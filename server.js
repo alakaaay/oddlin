@@ -1,6 +1,7 @@
 // Oddlin quiz server. Node built-ins only, no npm install.
 // Serves public/ on 127.0.0.1, starting at port 3000 and moving to the next free port if it is taken.
 // POST /api/event and POST /api/subscribe write quiz events and emails to Supabase (lib/event.js, lib/subscribe.js).
+// POST /api/purchase creates the app account after the paywall; POST /api/auth signs in to /app (lib/auth.js).
 // Supabase keys come from .env.local.
 // Usage: node server.js [--open]   (--open launches the default browser once the server is up)
 
@@ -11,6 +12,7 @@ const { exec } = require('child_process');
 const { loadEnv } = require('./lib/env');
 const { logEvent } = require('./lib/event');
 const { saveSubscriber } = require('./lib/subscribe');
+const { auth, purchase } = require('./lib/auth');
 
 loadEnv();
 
@@ -44,7 +46,9 @@ function send(res, status, body, type = 'text/plain; charset=utf-8') {
 // JSON API routes: the handler gets the parsed body and returns { status, body }
 const API = {
   '/api/event': logEvent,
-  '/api/subscribe': saveSubscriber
+  '/api/subscribe': saveSubscriber,
+  '/api/auth': auth,
+  '/api/purchase': purchase
 };
 
 function api(req, res, handler) {
