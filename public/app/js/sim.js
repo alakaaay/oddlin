@@ -30,6 +30,38 @@ async function post(body) {
     return await r.json();
   } catch (e) { return { ok: false, error: 'network' }; }
 }
+// AI review of one contract: cached on the server for the day, and here for the session
+const reviews = new Map();
+async function getReview(e, m, title) {
+  const key = e.platform + ':' + m.id;
+  if (reviews.has(key)) return reviews.get(key);
+  try {
+    const r = await fetch('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: getToken(), platform: e.platform, market_id: m.id, title }) }).then(x => x.json());
+    if (r.ok && r.review) reviews.set(key, r);
+    return r;
+  } catch (err) { return { ok: false, error: 'network' }; }
+}
+const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
+function reviewCard(rv, side, price, shares, est) {
+  if (!rv) return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion</p><p class="small muted ai-loading">Reading the market rules and prices…</p></div>`;
+  if (!rv.ok || !rv.review) return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion</p><p class="small muted">AI review isn’t available right now. <button class="link" data-review-retry>Try again</button></p></div>`;
+  const r = rv.review, mid = Math.round((r.ai_low + r.ai_high) / 2), pc = Math.round(price * 100);
+  const win = p => (side === 'yes' ? p : 100 - p);           // chance this side wins, in %
+  const evAi = win(mid) - pc, evYou = win(est) - pc;          // cents per contract
+  const evText = n => `<b class="${n > 0 ? 'pos' : n < 0 ? 'neg' : ''}">${signed(n)}¢</b>`;
+  const list = (h, a, cls) => a.length ? `<p class="ai-h ${cls}">${h}</p><ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion <span class="ai-conf ${r.confidence}">${r.confidence} confidence</span></p>
+    <p class="small">${esc(r.summary)}</p>
+    <div class="kv"><span>AI thinks YES has</span><b>${r.ai_low}–${r.ai_high}%</b></div>
+    <div class="ai-ev"><p class="small muted">Expected value of one ${side.toUpperCase()} contract at ${pc}¢</p>
+      <div class="kv"><span>AI: ${side.toUpperCase()} wins ${win(mid)}%</span>${evText(evAi)}</div>
+      <div class="kv"><span>You: ${side.toUpperCase()} wins ${win(est)}%</span>${evText(evYou)}</div>
+      <div class="kv"><span>Your ${shares} contracts, AI odds</span><b class="${evAi > 0 ? 'pos' : evAi < 0 ? 'neg' : ''}">${evAi < 0 ? '−' : evAi > 0 ? '+' : ''}${usd(Math.abs(evAi * shares) / 100)}</b></div>
+      <p class="small muted">Expected value = chance to win × $1 − price. Positive means the side looks cheap if those odds are right.</p></div>
+    ${list('Case for YES', r.yes_reasons, 'yes')}${list('Case for NO', r.no_reasons, 'no')}${list('What to watch', r.watch, '')}
+    <p class="disc">AI estimate, updated once a day. It can be wrong and isn’t financial advice.</p></div>`;
+}
 const TRADE_ERR = {
   market_closed: 'This market just closed or moved out of range. Pick another one.',
   amount_too_small: 'The amount is too small for this price.',
@@ -183,6 +215,8 @@ function openTicket(e, m, side0) {
   let side = side0, est = Math.round(m.yes * 100), amt = AMOUNTS.find(a => a <= S.simCash && a >= 25) || 10, busy = false, err = '';
   const title = e.title + (e.markets.length > 1 || m.label !== 'Yes' ? ` · ${m.label}` : '');
   const layer = $('#layer');
+  let review = null, closed = false;
+  const fetchReview = () => getReview(e, m, title).then(r => { review = r; if (!closed && layer.firstChild) draw(); });
   function draw() {
     const price = side === 'yes' ? m.yes : m.no, pc = Math.round(price * 100);
     const shares = Math.floor(amt / price), cost = shares * price;
@@ -206,6 +240,7 @@ function openTicket(e, m, side0) {
           <div class="kv"><span>Payout if right</span><b>${usd(shares)}</b></div>
           <p class="small" style="color:${edge > 0 ? 'var(--hit)' : edge < 0 ? 'var(--miss)' : 'var(--ink-muted)'}">${edge > 0 ? `Your odds are ${edge} pts above the price. The math says this side looks cheap.` : edge === 0 ? 'Your odds match the price. No edge here.' : `Your odds are ${-edge} pts below the price. The math says skip or take the other side.`}</p>
         </div>
+        ${reviewCard(review, side, price, shares, est)}
         ${err ? `<p class="feedback miss" role="alert">${esc(err)}</p>` : ''}
       </div>
       <div class="lesson-foot"><button class="btn" data-buy-now ${busy || cost > S.simCash || !shares ? 'disabled' : ''}>${busy ? 'Placing…' : `Place play-money trade · ${usd(cost)}`}</button>
@@ -215,7 +250,8 @@ function openTicket(e, m, side0) {
     $('#est').oninput = ev => { est = +ev.target.value; draw(); $('#est').focus(); };
   }
   layer.onclick = async ev => {
-    if (ev.target.closest('[data-close]')) { layer.innerHTML = ''; layer.onclick = null; return; }
+    if (ev.target.closest('[data-close]')) { closed = true; layer.innerHTML = ''; layer.onclick = null; return; }
+    if (ev.target.closest('[data-review-retry]')) { review = null; draw(); fetchReview(); return; }
     const s = ev.target.closest('[data-side]'); if (s) { side = s.dataset.side; draw(); return; }
     const a = ev.target.closest('[data-amt]'); if (a) { amt = +a.dataset.amt; draw(); return; }
     if (ev.target.closest('[data-buy-now]') && !busy) {
@@ -227,10 +263,11 @@ function openTicket(e, m, side0) {
       S.simCash -= t.shares * t.price;
       S.trades = [t].concat(S.trades.filter(x => x.id !== t.id));
       S.xp += 10; touchStreak(); save(); checkBadges();
-      layer.innerHTML = ''; layer.onclick = null; setSimTab('mine'); location.hash = '#/sim'; route();
+      closed = true; layer.innerHTML = ''; layer.onclick = null; setSimTab('mine'); location.hash = '#/sim'; route();
     }
   };
   draw();
+  fetchReview();
 }
 
 // ── my calls ──

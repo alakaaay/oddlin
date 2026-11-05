@@ -641,3 +641,20 @@ button.lrow:focus-visible { outline: 2px solid var(--signal); outline-offset: -2
 .chip.up { background: var(--hit-soft); color: var(--hit); } .chip.down { background: var(--miss-soft); color: var(--miss); }
 #board-rows { display: grid; gap: 8px; } #board-rows > .eyebrow { margin-top: 8px; }
 .xp-chip { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--ink); }
+
+/* AI review in the trade ticket */
+.ai-review { display: grid; gap: 8px; }
+.ai-review .eyebrow { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ai-conf { font-size: 11px; font-weight: 600; line-height: 1; text-transform: none; letter-spacing: 0; padding: 4px 8px; border-radius: 999px; background: var(--miss-soft); color: var(--miss); }
+.ai-conf.medium { background: var(--ground); color: var(--ink-muted); }
+.ai-conf.high { background: var(--hit-soft); color: var(--hit); }
+.ai-ev { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: var(--ground); border: 1px solid var(--line); }
+.ai-review .pos { color: var(--hit); }
+.ai-review .neg { color: var(--miss); }
+.ai-h { margin: 6px 0 0; font-weight: 600; font-size: 14px; }
+.ai-h.yes { color: var(--hit); }
+.ai-h.no { color: var(--miss); }
+.ai-review ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; line-height: 1.4; }
+.ai-loading { animation: ai-pulse 1.2s ease-in-out infinite; }
+@keyframes ai-pulse { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .ai-loading { animation: none; } }
