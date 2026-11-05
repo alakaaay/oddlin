@@ -568,3 +568,11 @@ body.gated .shell, body.gated #play, body.gated #perks { visibility: hidden; }
 .modal h2 { font-size: 21px; }
 .modal-bal { display: flex; justify-content: space-between; gap: 8px; padding: 10px 14px; border-radius: var(--r-md); background: var(--ground); border: 1px solid var(--line); font-size: 15px; }
 @keyframes vfade { from { opacity: 0; } }
+
+/* password show / hide */
+.pw-wrap { position: relative; }
+.pw-wrap .g-in { padding-right: 56px; }
+.pw-eye { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: none; border-radius: 10px; display: grid; place-items: center; color: var(--ink-muted); }
+.pw-eye svg { width: 22px; height: 22px; fill: currentColor; }
+.pw-eye[aria-pressed="true"] { color: var(--signal-text); }
+.pw-eye:focus-visible { outline: 2px solid var(--signal); outline-offset: -2px; }

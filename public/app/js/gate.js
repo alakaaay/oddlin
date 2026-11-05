@@ -56,6 +56,10 @@ export function gate(startStep) {
   if (!g) { g = document.createElement('div'); g.id = 'gate'; document.body.appendChild(g); }
   document.body.classList.add('gated');
   const field = (id, type, ph, ac, extra = '') => `<input class="g-in" id="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}" ${extra}>`;
+  // Password input with a show / hide toggle next to it
+  const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C6.5 5 2.7 9.4 1.5 12c1.2 2.6 5 7 10.5 7s9.3-4.4 10.5-7C21.3 9.4 17.5 5 12 5zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg>';
+  const EYE_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.3 2 2 3.3l3.2 3.2C3.4 7.9 2.1 9.9 1.5 12c1.2 2.6 5 7 10.5 7 1.9 0 3.6-.5 5-1.3l3.7 3.7 1.3-1.3zM12 16.5A4.5 4.5 0 0 1 7.5 12c0-.7.2-1.4.5-2l1.5 1.5v.5a2.5 2.5 0 0 0 3 2.5l1.5 1.5c-.6.3-1.3.5-2 .5zM12 5c-1.3 0-2.6.3-3.7.7l2 2c.5-.1 1.1-.2 1.7-.2a4.5 4.5 0 0 1 4.5 4.5c0 .6-.1 1.2-.3 1.7l3 3c1.5-1.3 2.6-2.9 3.3-4.7C21.3 9.4 17.5 5 12 5z"/></svg>';
+  const pwField = (id, ph, ac) => `<div class="pw-wrap">${field(id, 'password', ph, ac)}<button type="button" class="pw-eye" data-eye="${id}" aria-label="Show password" aria-pressed="false">${EYE}</button></div>`;
   function view() {
     const back = !['welcome', 'ready'].includes(step) && !step.startsWith('ob') ? '<button class="x" data-g="back" aria-label="Back">‹</button>' : '<span></span>';
     const obN = { ob1: 1, ob2: 2, ob3: 3, ob4: 4 }[step];
@@ -104,11 +108,11 @@ export function gate(startStep) {
       <button class="link center" data-g="resend" ${Date.now() < resendAt ? 'disabled' : ''}>${Date.now() < resendAt ? `Send a new code in ${Math.ceil((resendAt - Date.now()) / 1000)}s` : 'Send a new code'}</button>`;
     if (step === 'newpw') body = `<div class="g-hero">🔐</div><h1>${reset ? 'Set a new password' : 'Create a password'}</h1>
       <p class="muted">${reset ? 'Use it from now on. Other devices will be signed out.' : 'Next time you’ll sign in with your email and this password.'}</p>
-      ${field('g-pw1', 'password', 'New password (8+ characters)', 'new-password')}${field('g-pw2', 'password', 'Repeat password', 'new-password')}
+      ${pwField('g-pw1', 'New password (8+ characters)', 'new-password')}${pwField('g-pw2', 'Repeat password', 'new-password')}
       <button class="btn" data-g="newpw">Save password</button>`;
     if (step === 'password') body = `<div class="g-hero">👋</div><h1>Welcome back</h1>
       <p class="muted">Enter the password for <b>${esc(email)}</b>.</p>
-      ${field('g-pw', 'password', 'Password', 'current-password')}
+      ${pwField('g-pw', 'Password', 'current-password')}
       <button class="btn" data-g="login">Sign in</button>
       ${wrongPw ? '<button class="link center" data-g="forgot">Forgot password?</button>' : ''}`;
     if (step === 'ob1') body = `<h1>What should we call you?</h1><p class="muted">Your name shows on your profile and leaderboard.</p>
@@ -198,6 +202,16 @@ export function gate(startStep) {
   }
   g.onsubmit = e => e.preventDefault();
   g.onclick = e => {
+    const eye = e.target.closest('[data-eye]');
+    if (eye) {
+      const input = g.querySelector('#' + eye.dataset.eye), show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      eye.setAttribute('aria-pressed', String(show));
+      eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      eye.innerHTML = show ? EYE_OFF : EYE;
+      input.focus();
+      return;
+    }
     const t = e.target.closest('[data-topic]'); if (t) { const v = t.dataset.topic; prof.topics = prof.topics.includes(v) ? prof.topics.filter(x => x !== v) : prof.topics.concat(v); view(); return; }
     const m = e.target.closest('[data-min]'); if (m) { prof.minutes = +m.dataset.min; view(); return; }
     const l = e.target.closest('[data-level]'); if (l) { prof.level = l.dataset.level; view(); return; }
