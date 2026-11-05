@@ -2,6 +2,7 @@
 import { loadBoard } from './board.js';
 import { loadSim } from './sim.js';
 import { loadCoachLeft } from './coach.js';
+import { loadScanner } from './scanner.js';
 import { ALL, nextNode } from './course.js';
 import { paintPerks } from './perks.js';
 import { $ } from './util.js';
@@ -20,7 +21,7 @@ export function route() {
   const name = (location.hash.match(/^#\/(\w+)/) || [])[1];
   const v = VIEWS[name] ? name : 'learn';
   $('#view').innerHTML = SOON[v] ? soonView(v) : VIEWS[v]();
-  const prof = v === 'profile' || v === 'badges', tabOf = v === 'badges' ? 'profile' : v;
+  const prof = v === 'profile' || v === 'badges', tabOf = v === 'badges' ? 'profile' : v === 'coach' || v === 'scanner' ? 'ai' : v;
   $('.mark').hidden = prof; $('.stats').hidden = prof; $('.bar-title').hidden = !prof; $('.gear').hidden = v !== 'profile';
   $('.bar-title').textContent = v === 'badges' ? 'Achievements' : 'Profile';
   document.querySelectorAll('.tabs a').forEach(a => a.dataset.tab === tabOf ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
@@ -31,6 +32,7 @@ export function route() {
   if (v === 'learn') { const c = $('.lvl.current'); if (c) c.scrollIntoView({ block: 'center' }); } else window.scrollTo(0, 0);
   if (v === 'board') loadBoard();
   if (v === 'sim') loadSim();
-  if (v === 'ai') { loadCoachLeft(route); const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
+  if (v === 'scanner') loadScanner();
+  if (v === 'coach') { loadCoachLeft(route); const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
 }
 addEventListener('hashchange', route);

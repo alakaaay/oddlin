@@ -5,6 +5,7 @@ import { AVG_MIN, BADGES, LEARNERS, level } from './progression.js';
 import { fmtDate } from './share.js';
 import { boardTab } from './board.js';
 import { COACH_HELLO, COACH_SUGGEST, coachBusy, coachLocked, coachMeter } from './coach.js';
+import { scannerView } from './scanner.js';
 import { simView, stats } from './sim.js';
 import { S } from './state.js';
 import { $, ICON, esc } from './util.js';
@@ -67,10 +68,40 @@ export const VIEWS = {
     </section>`;
   },
 
+  // AI Tools hub: the scanner and the coach are live, arbitrage is a placeholder until its features are defined
   ai() {
+    const tool = (t, i) => `<${t.href ? `a href="${t.href}"` : `button data-tool-soon="${esc(t.name)}"`} class="tool-card ${t.cls}${t.href ? '' : ' soon'}" style="--d:${i * 90}ms">
+        <span class="tool-ic" aria-hidden="true">${t.icon}</span>
+        <span class="tool-txt"><b>${t.name}</b><span class="small muted">${t.text}</span></span>
+        ${t.href ? '<span class="tool-live">Live</span><span class="chev" aria-hidden="true">›</span>' : '<span class="tool-soon">Soon</span>'}
+      </${t.href ? 'a' : 'button'}>`;
+    const tools = [
+      { name: 'AI Scanner', cls: 'scan', href: '#/scanner', text: 'Daily picks where the price looks too cheap', icon: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" class="ring"/><circle cx="24" cy="24" r="11" class="ring"/><circle cx="24" cy="24" r="4" class="ring"/><path d="M24 24 L24 6 A18 18 0 0 1 39.6 15 Z" class="sweep"/><circle cx="33" cy="17" r="2.2" class="blip b1"/><circle cx="15" cy="30" r="2" class="blip b2"/></svg>` },
+      { name: 'AI Arbitrage', cls: 'arb', text: 'In development', icon: `<svg viewBox="0 0 48 48"><path d="M10 17h24" class="arr a1"/><path d="M28 11l6 6-6 6" class="arr a1"/><path d="M38 31H14" class="arr a2"/><path d="M20 25l-6 6 6 6" class="arr a2"/></svg>` },
+      { name: 'AI Coach', cls: 'coach', href: '#/coach', text: 'Ask about any lesson or your own trades', icon: `<svg viewBox="0 0 48 48"><path d="M10 12h28a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4H22l-8 7v-7h-4a4 4 0 0 1-4-4V16a4 4 0 0 1 4-4z" class="bubble"/><circle cx="17" cy="23" r="2.4" class="dot d1"/><circle cx="24" cy="23" r="2.4" class="dot d2"/><circle cx="31" cy="23" r="2.4" class="dot d3"/></svg>` }
+    ];
+    // Hero: a small neural net whose nodes pulse and whose links carry moving sparks
+    const N = [[30, 40], [30, 90], [30, 140], [110, 25], [110, 75], [110, 125], [110, 165], [190, 55], [190, 115], [260, 85]];
+    const L = [[0, 3], [0, 4], [1, 4], [1, 5], [2, 5], [2, 6], [1, 3], [3, 7], [4, 7], [4, 8], [5, 8], [6, 8], [5, 7], [7, 9], [8, 9]];
+    const net = `<svg class="net" viewBox="0 0 290 190" aria-hidden="true">
+      ${L.map(([a, b], i) => `<path d="M${N[a][0]} ${N[a][1]}L${N[b][0]} ${N[b][1]}" class="link" style="--d:${(i * 0.37) % 3}s"/>`).join('')}
+      ${N.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 9 ? 9 : 5}" class="node${i === 9 ? ' out' : ''}" style="--d:${(i * 0.29) % 2}s"/>`).join('')}
+    </svg>`;
+    return `<section class="view tools">
+      <div class="tools-hero">
+        ${net}<span class="glow g1"></span><span class="glow g2"></span>
+        <div class="tools-hero-txt"><p class="eyebrow">AI Tools</p><h1>Your AI edge</h1><p>Smart helpers that read the markets with you. Find a trade, ask your coach, more is on the way.</p></div>
+      </div>
+      <div class="tool-list">${tools.map(tool).join('')}</div>
+      <p class="disc">Educational only, not financial advice. Oddlin never trades for you.</p>
+    </section>`;
+  },
+
+  coach() {
     const st = stats();
     const chat = S.chat.length ? S.chat : [{ me: false, text: COACH_HELLO }];
     return `<section class="view">
+      <a class="back-link" href="#/ai">‹ AI Tools</a>
       <div><p class="eyebrow">AI Coach</p><h1>How sharp are your odds?</h1></div>
       <div class="score">
         <div><b>${st.n}</b><span class="small muted">settled calls</span></div>
@@ -85,6 +116,8 @@ export const VIEWS = {
       <p class="disc">The coach only knows the Oddlin course and your demo trades. Educational only, not financial advice.</p>
     </section>`;
   },
+
+  scanner() { return scannerView(); },
 
   sim() { return simView(); },
 

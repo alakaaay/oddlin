@@ -211,8 +211,9 @@ function eventCard(e, i) {
 }
 
 // ── trade ticket ──
-function openTicket(e, m, side0) {
-  let side = side0, est = Math.round(m.yes * 100), amt = AMOUNTS.find(a => a <= S.simCash && a >= 25) || 10, busy = false, err = '';
+// est0: odds to start the slider at (the AI Scanner passes its estimate); defaults to the crowd's price
+export function openTicket(e, m, side0, est0) {
+  let side = side0, est = est0 || Math.round(m.yes * 100), amt = AMOUNTS.find(a => a <= S.simCash && a >= 25) || 10, busy = false, err = '';
   const title = e.title + (e.markets.length > 1 || m.label !== 'Yes' ? ` · ${m.label}` : '');
   const layer = $('#layer');
   let review = null, closed = false;
@@ -263,6 +264,7 @@ function openTicket(e, m, side0) {
       S.simCash -= t.shares * t.price;
       S.trades = [t].concat(S.trades.filter(x => x.id !== t.id));
       S.xp += 10; touchStreak(); save(); checkBadges();
+      S.simPlatform = e.platform; save();
       closed = true; layer.innerHTML = ''; layer.onclick = null; setSimTab('mine'); location.hash = '#/sim'; route();
     }
   };

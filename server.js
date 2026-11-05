@@ -18,6 +18,7 @@ const { trade } = require('./lib/trades');
 const { review } = require('./lib/review');
 const { coach } = require('./lib/coach');
 const { billing } = require('./lib/billing');
+const { scanner } = require('./lib/scanner');
 const { listMarkets } = require('./lib/markets');
 
 loadEnv();
@@ -58,7 +59,8 @@ const API = {
   '/api/trade': trade,
   '/api/review': review,
   '/api/coach': coach,
-  '/api/billing': billing
+  '/api/billing': billing,
+  '/api/scanner': scanner
 };
 
 function api(req, res, handler) {

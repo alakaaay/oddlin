@@ -11,11 +11,13 @@ import { BADGES, checkBadges, openRanks, tip } from './progression.js';
 import { route } from './router.js';
 import { applyTheme, openSettings } from './settings.js';
 import { openBadge } from './share.js';
+import { scannerClick } from './scanner.js';
 import { setSimTab } from './sim.js';
 import { S, bump, paintBar, save, settleStreak } from './state.js';
 import { $, BONUS_COINS } from './util.js';
 
 document.addEventListener('click', e => {
+  if (scannerClick(e)) return;
   const n = e.target.closest('[data-node]');
   if (n) { if (n.classList.contains('locked')) { tip('Finish the level before this one first.'); return; } startNode(ALL.find(x => x.id === n.dataset.node)); return; }
   if (e.target.closest('[data-streak]')) { openStreak(); return; }
@@ -40,6 +42,7 @@ document.addEventListener('click', e => {
   const bd = e.target.closest('[data-badge]'); if (bd) { openBadge(BADGES.find(b => b.id === bd.dataset.badge)); return; }
   if (e.target.closest('[data-settings]')) { openSettings(); return; }
   if (e.target.closest('[data-billing]')) { openBilling(); return; }
+  const ts = e.target.closest('[data-tool-soon]'); if (ts) { tip(`${ts.dataset.toolSoon} is in development. Coming soon.`); return; }
   if (e.target.closest('[data-coach-plus]')) { buyCoachPlus().then(ok => { if (ok) loadCoachLeft(route); }); return; }
 });
 document.addEventListener('submit', e => {
@@ -54,7 +57,7 @@ async function ask(q) {
   const text = await pending;
   S.chat.push({ me: false, text });
   S.chat = S.chat.slice(-20); S.asked++; save(); checkBadges();
-  if ((location.hash.match(/^#\/(\w+)/) || [])[1] === 'ai') { route(); const f = $('#askq'); if (f) f.focus({ preventScroll: true }); }
+  if ((location.hash.match(/^#\/(\w+)/) || [])[1] === 'coach') { route(); const f = $('#askq'); if (f) f.focus({ preventScroll: true }); }
 }
 
 applyTheme();
