@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oddlin</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0D11" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/logo/oddlin-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Outfit:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/app/app.css">
+<script>try { var t = JSON.parse(localStorage.getItem('oddlin_app_v1') || '{}').theme; if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<div class="shell">
+  <header class="bar">
+    <img class="mark" src="/assets/logo/oddlin-icon.svg" alt="Oddlin" width="32" height="32">
+    <h1 class="bar-title" hidden>Profile</h1>
+    <div class="stats">
+      <span class="stat" title="Day streak" data-streak role="button" tabindex="0"><span class="flame" aria-hidden="true"></span><b id="streak">0</b></span>
+      <span class="stat" title="Play money"><span class="coin" aria-hidden="true">$</span><b id="balance">$0</b></span>
+    </div>
+    <button class="gear" data-settings aria-label="Settings" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg></button>
+  </header>
+  <main id="view" tabindex="-1"></main>
+  <button class="play-cta" id="play" hidden></button>
+  <div class="perks" id="perks" hidden>
+    <button class="perk" data-gifts aria-label="Daily gifts"><span class="perk-i"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-2.2A3 3 0 0 0 12 4.4 3 3 0 0 0 6.2 7H4a1 1 0 0 0-1 1v3h18V8a1 1 0 0 0-1-1zM9 7a1 1 0 1 1 1-1v1zm5 0V6a1 1 0 1 1 1 1zM4 13v6a1 1 0 0 0 1 1h6v-7zm9 7h6a1 1 0 0 0 1-1v-6h-7z"/></svg></span><span class="perk-l">Gifts</span></button>
+    <button class="perk" data-bonus aria-label="Bonus coins every 3 hours"><span class="perk-i coin-i">$</span><span class="perk-l">Bonus</span></button>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#/learn" data-tab="learn"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM13 4h5.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H13z"/></svg><span>Learn</span></a>
+    <a href="#/ai" data-tab="ai"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/></svg><span>AI Coach</span><i class="soon-tag">Soon</i></a>
+    <a href="#/sim" data-tab="sim"><svg viewBox="0 0 24 24"><path d="M3 19h18v2H3zM4 16l5-6 4 3 6-8 1.6 1.2L13.4 16 9.3 13 5.5 17.3z"/></svg><span>Simulator</span><i class="soon-tag">Soon</i></a>
+    <a href="#/board" data-tab="board"><svg viewBox="0 0 24 24"><path d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/></svg><span>Leaderboard</span></a>
+    <a href="#/profile" data-tab="profile"><svg viewBox="0 0 24 24"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"/></svg><span>Profile</span></a>
+  </nav>
+</div>
+<div id="layer"></div>
+<script src="/app/app.js"></script>
+</body>
+</html>
