@@ -144,5 +144,21 @@ export const V = {
       <g class="pop" ${dl(.4)}><circle cx="40" cy="84" r="11" fill="var(--hit)"/><text x="40" y="118" class="vt" font-size="14">0 perfect</text></g>
       <g class="pop" ${dl(.7)}><circle cx="100" cy="84" r="11" fill="var(--gold)"/><text x="100" y="56" class="vt" font-size="13">0.25 = always 50%</text></g>
       <g class="pop" ${dl(1)}><circle cx="280" cy="84" r="11" fill="var(--miss)"/><text x="280" y="118" class="vt" font-size="14">1 worst</text></g>`);
+  },
+  // Simulator wallet card: three numbers side by side
+  wallet(cols) {
+    return vsvg(`<g class="pop"><rect x="20" y="30" width="280" height="100" rx="16" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>
+      <text x="36" y="50" class="vt-l muted-t" font-size="12">SIMULATOR · DEMO MONEY</text></g>
+      ${cols.map(([l, v, c], i) => `<g class="pop" ${dl(.25 + i * .2)}><text x="${66 + i * 94}" y="82" class="vt" font-size="20" ${c ? `style="fill:var(--${c})"` : ''}>${v}</text>
+        <text x="${66 + i * 94}" y="108" class="vt muted-t" font-size="13">${l}</text></g>`).join('')}`);
+  },
+  // AI gives a second opinion, the person makes the call
+  aiYou() {
+    return vsvg(`<circle cx="74" cy="92" r="34" fill="var(--signal-soft)" class="pop"/>${emo('🤖', 74, 94, 40, 'pop')}
+      <g class="pop" ${dl(.3)}><rect x="20" y="16" width="120" height="34" rx="12" fill="var(--surface)" stroke="var(--line)" stroke-width="2"/>
+      <text x="80" y="33" class="vt" font-size="14">“Looks cheap”</text></g>
+      <circle cx="246" cy="92" r="34" fill="var(--hit-soft)" class="pop" ${dl(.5)}/>${emo('🙋', 246, 94, 40, 'pop', .5)}
+      <path class="draw" ${dl(.7)} d="M118 92 H200" stroke="var(--line-strong)" stroke-width="3" stroke-dasharray="6 6" fill="none"/>
+      ${pill(196, 132, 100, 26, 'var(--signal)', 'You decide', '#fff', 'pop pulse', 1)}`);
   }
 };

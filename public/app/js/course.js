@@ -13,15 +13,16 @@ export const COURSE = [
     { id: 'd1l1', kind: 'lesson', title: 'A price is a probability', steps: [
       T('Welcome! Let’s start simple.', 'A prediction market asks one yes-or-no question about the future. For example: will the Fed cut interest rates in December?', V.q('Will the Fed cut rates', 'in December?')),
       T('Pick a side: YES or NO.', 'Think it’ll happen? Buy YES. Think it won’t? Buy NO. That’s the whole idea. Each piece you buy is called a contract.', V.split('YES', 'NO')),
-      { t: 'odds', big: 'Every contract has a price.', crowd: 62, body: `Prices go from 1${C} to 99${C}. Right now, YES on the Fed question costs 62${C}. Let’s see what that number means.` },
+      { t: 'odds', big: 'Every contract has a price.', crowd: 62, body: `In the Simulator you see it right on the button: YES 62${C}. Prices go from 1${C} to 99${C}. Let’s see what that number means.` },
       T('The price is like a vote count.', `62${C} means the crowd thinks there’s about a 62% chance. Just read cents as percent. Easy, right?`, V.dots(50, 31, '62% of the crowd says YES')),
       T('Cheap means unlikely. Pricey means likely.', `10${C}? The crowd thinks it’s a long shot. 90${C}? Almost sure. But almost sure is still not certain.`, V.bars([{ l: 'long shot', v: 10, top: `10${C}`, c: 'var(--miss)' }, { l: 'coin flip', v: 50, top: `50${C}`, c: 'var(--gold)' }, { l: 'likely', v: 90, top: `90${C}`, c: 'var(--hit)' }])),
-      T('News moves the price.', 'A surprise inflation number or a Fed speech can push the price up or down in minutes. Prices change as people change their minds.', V.chart('up', 'CPI news')),
+      T('News moves the price.', 'Simulator prices are live. A surprise inflation number or a Fed speech can push them up or down in minutes, as people change their minds.', V.chart('up', 'CPI news')),
       T('The crowd isn’t always right.', 'Something priced at 62% still fails about 4 times out of 10. Your job is to spot when the crowd is too high or too low.', V.dots(10, 6, 'priced at 62%: about 6 hit, 4 miss', true)),
-      T('Practice with play money first.', 'Every trade in Oddlin uses play money. Make mistakes for free, learn how prices move and build your own track record.', V.emoji('🪙', ['🎮', '✨', 'PLAY'])),
-      q(`YES costs 30${C}. What chance does the market give?`, ['About 30%', 'About 70%', `It pays 30${C}`], 'Read cents as percent: 30¢ ≈ 30%.', 'Read the price in cents as a percent.'),
-      q(`A contract costs 85${C}. What does the crowd think?`, ['Likely, but not certain', 'It will surely happen', 'It’s unlikely'], '85% is high, but only 100% would be certain.', 'How far is 85 from 100?')
-    ] },
+      T('Practice in the Simulator.', 'The Simulator shows real live markets at real prices, but you trade demo money. Make mistakes for free and build your own track record.', V.emoji('🎮', ['🪙', 'LIVE', 'DEMO'])),
+      T('Your demo trades show up in one place.', 'Cash, trades and P&L sit at the top of the Simulator. Tap any contract to see how it’s doing.', V.wallet([['Cash', '$938'], ['Trades', '1'], ['P&L', '+$4', 'hit']])),
+      q(`In the Simulator, the YES button on “Will the Fed cut rates?” says 30${C}. What chance does the market give?`, ['About 30%', 'About 70%', `It pays 30${C}`], 'Read cents as percent: 30¢ ≈ 30%.', 'Read the price on the button as a percent.'),
+      q(`You open a Simulator market and YES costs 85${C}. What does the crowd think?`, ['Likely, but not certain', 'It will surely happen', 'It’s unlikely'], '85% is high, but only 100% would be certain.', 'How far is 85 from 100?')
+    ], cta: { label: 'Try a demo trade', text: 'Now try it on a live market with demo money: pick one and buy YES or NO.', href: '#/sim' } },
     { id: 'd1l2', kind: 'lesson', title: '$1 or $0: your max loss is fixed', steps: [
       T('Every market has an end date.', 'On that day we get a clear answer. Did the Fed cut rates or not? It’s yes or no, nothing in between.', V.emoji('🗓️', ['✅', 'DEC 10'])),
       T('Right answer? You get $1.', 'Each winning contract pays exactly $1. Held YES and it happened? $1 each. Held NO and it didn’t happen? Also $1 each.', V.coin('YES ✓', '$1', 'winners always get $1')),
@@ -32,11 +33,12 @@ export const COURSE = [
       T('Pricey contracts: small payout, often.', `A 90${C} contract earns just 10${C} when it wins. One loss costs 90${C} and wipes out nine wins.`, V.winloss()),
       T('Check two numbers before every trade.', 'Max loss and max payout. Oddlin shows both on every ticket. Look at them before you tap Buy. Every single time.', V.ticket([['Max loss', '$6.20'], ['Max payout', '$10.00']])),
       T('Pick your comfort zone first.', 'Before a trade, decide how much you’re okay losing on that idea. Then buy only as many contracts as fit that amount.', V.slider('$0', '$20', 'okay to lose: $10')),
-      T('Start small. Seriously.', 'Small trades keep mistakes cheap. With play money you can try ideas, see what happens and learn without any stress.', V.emoji('🌱', ['💧', '☀️'])),
-      q(`You buy 20 YES at 40${C}. What’s your max loss?`, ['$8', '$20', '$12'], '20 × $0.40 = $8. That’s what you paid.', 'Max loss = contracts × price.'),
-      q('You hold NO and the event does NOT happen. What does each NO pay?', ['$1', '$0', 'What you paid'], 'NO wins when it doesn’t happen, and winners pay $1.', 'NO means “it won’t happen”.'),
-      q(`You buy 10 YES at 70${C}. What’s the most you can make?`, ['$3', '$10', '$7'], '$10 payout − $7 paid = $3.', 'Total payout minus what you paid.')
-    ] },
+      T('AI tools are here to help.', 'Your AI Coach explains lessons and your P&L. AI review and the AI Scanner give a second opinion on a price, with reasons.', V.check(['AI Coach', 'AI review', 'AI Scanner'])),
+      T('But the decision is always yours.', 'AI can be wrong, and it doesn’t know your budget or comfort zone. Read its reasons, check the two numbers, then you decide.', V.aiYou()),
+      q(`You ask your AI Coach: “I bought 20 YES at 40${C}. What’s my max loss?” What should it answer?`, ['$8', '$20', '$12'], '20 × $0.40 = $8. That’s what you paid.', 'Max loss = contracts × price.'),
+      q('You ask your AI Coach: “I hold NO and the event didn’t happen. What does each NO pay?” The right answer:', ['$1', '$0', 'What you paid'], 'NO wins when it doesn’t happen, and the right side pays $1.', 'NO means “it won’t happen”.'),
+      q(`Your AI Coach reviews a trade: 10 YES bought at 70${C}. What’s the best case?`, ['$3 more than you paid', '$10 more than you paid', '$7 more than you paid'], '$10 payout − $7 paid = $3.', 'Total payout minus what you paid.')
+    ], cta: { label: 'Ask your AI Coach', text: 'Got a question about a lesson or your P&L? Your AI Coach answers in plain English.', href: '#/coach' } },
     { id: 'd1l3', kind: 'lesson', title: 'Odds, not luck', steps: [
       T('Wait, isn’t this gambling?', 'Fair question! Both involve money and an uncertain result. The difference is how you decide and what you’re deciding on.', V.emoji('🤔', ['🎲', '📊'])),
       T('Casinos are built to beat you.', 'Roulette and slots are designed so the house wins over time. No amount of research changes how a wheel spins.', V.emoji('🎰', ['🏠', '💸'], 'shake')),

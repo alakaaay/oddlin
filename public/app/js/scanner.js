@@ -6,6 +6,7 @@
 import { ADDONS, buyAddon, loadBilling } from './billing.js';
 import { getToken } from './gate.js';
 import { openTicket } from './sim.js';
+import { checkBadges } from './progression.js';
 import { S, save } from './state.js';
 import { $, esc } from './util.js';
 
@@ -166,6 +167,7 @@ async function scan() {
     st.today = [r.signal].concat(st.today);
     st.history = [Object.assign({ day: new Date().toISOString().slice(0, 10) }, r.signal)].concat(st.history);
     st.left = r.left;
+    S.scans = (S.scans || 0) + 1; save(); checkBadges(); // first pick unlocks the Scout badge
     paint(); openPick(r.signal);
   } else { err = ERR[r.error] || 'The scan didn’t work. Try again in a minute.'; if (r.error === 'daily_limit') st.left = 0; paint(); }
 }

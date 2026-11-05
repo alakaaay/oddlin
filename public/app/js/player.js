@@ -2,6 +2,7 @@
 import { TEST_UNLOCK } from './course.js';
 import { checkBadges } from './progression.js';
 import { route } from './router.js';
+import { setSimTab } from './sim.js';
 import { S, bump, save, touchStreak } from './state.js';
 import { $, LESSON_REWARD, QUIZ_RETAKE, esc, money } from './util.js';
 
@@ -92,10 +93,15 @@ export function openLesson(node) {
       <h2>${esc(node.title)}: ${quiz ? 'passed' : 'done'}</h2>
       <p class="muted">${first ? `+${xp} XP · +${LESSON_REWARD} coins` : 'Nice refresher.'}</p>
       ${mistakes && !quiz ? `<p class="small muted">${mistakes} answer${mistakes > 1 ? 's' : ''} to revisit. Your coach will bring ${mistakes > 1 ? 'them' : 'it'} back.</p>` : ''}
-    </div><div class="lesson-foot"><button class="btn" data-close>Continue</button></div></div></div>`;
+      ${node.cta ? `<p class="lesson-cta-text">${esc(node.cta.text)}</p>` : ''}
+    </div><div class="lesson-foot">${node.cta
+      ? `<button class="btn gold" data-cta>${esc(node.cta.label)}</button><button class="btn ghost" data-close>Back to the map</button>`
+      : '<button class="btn" data-close>Continue</button>'}</div></div></div>`;
   }
   layer.onclick = e => {
     if (e.target.closest('[data-close]')) { layer.innerHTML = ''; layer.onclick = null; route(); return; }
+    // Lesson CTA (lesson 1: try a demo trade, lesson 2: ask the AI Coach): close the lesson and open the target screen
+    if (e.target.closest('[data-cta]')) { layer.innerHTML = ''; layer.onclick = null; if (node.cta.href === '#/sim') setSimTab('home'); location.hash = node.cta.href; if (location.hash === node.cta.href) route(); return; }
     if (e.target.closest('[data-retake]')) {
       if (TEST_UNLOCK || S.done.includes(node.id)) { layer.innerHTML = ''; openLesson(node); return; }
       payRetake(node); return;

@@ -14,8 +14,8 @@ export const today = () => iso(new Date());
 export const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return iso(d); };
 export const dayGap = (a, b) => Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 864e5);
 export const MAX_FREEZE = 2, QUIZ_RETAKE = 500, BONUS_COINS = 50, BONUS_EVERY = 3 * 36e5;
-// 7-day gift ladder: coins, a chest on day 5, an Epic chest plus 30 XP on day 7
-export const GIFTS = [{ c: 50 }, { c: 100 }, { c: 150 }, { c: 200 }, { chest: 0 }, { c: 400 }, { chest: 2, xp: 30 }];
+// 7-day gift ladder: a chest on day 1 (the first chest ever is Epic or Legendary), coins, a chest on day 5, an Epic chest plus 30 XP on day 7
+export const GIFTS = [{ chest: 0 }, { c: 100 }, { c: 150 }, { c: 200 }, { chest: 0 }, { c: 400 }, { chest: 2, xp: 30 }];
 export const giftLabel = g => g.chest == null ? `${g.c} coins` : g.chest === 2 ? 'Epic chest' : 'Mystery chest';
 
 export const ICON = {
