@@ -356,7 +356,7 @@
     done: '<svg viewBox="0 0 24 24"><path d="M9.5 16.2L5 11.7l-1.6 1.6 6.1 6.1L21 7.9l-1.6-1.6z"/></svg>'
   };
   const CHEST = '<svg viewBox="0 0 64 56" aria-hidden="true"><path class="lid" d="M6 22C6 10 16 4 32 4s26 6 26 18v4H6z"/><g class="loot"><path d="M9 27Q32 17 55 27Z" fill="#3A2414"/><circle cx="22" cy="24.5" r="4.5" fill="#F5B301"/><circle cx="32" cy="22" r="5" fill="#FFD34D"/><circle cx="42" cy="24.5" r="4.5" fill="#F5B301"/></g><rect class="box" x="6" y="26" width="52" height="26" rx="4"/><rect class="band" x="6" y="24" width="52" height="6"/><rect class="lock" x="27" y="22" width="10" height="13" rx="2"/></svg>';
-  const TEST_UNLOCK = true; // MVP testing: every built lesson and quiz is open. Set to false to unlock one by one.
+  const TEST_UNLOCK = false; // true opens every built lesson and quiz and makes quiz retakes free (for testing)
   const nextNode = () => ALL.find(n => !S.done.includes(n.id));
 
   // ---------- views ----------
