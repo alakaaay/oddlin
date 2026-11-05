@@ -52,35 +52,6 @@ main { flex: 1; padding: 16px 16px calc(var(--tabs-h) + env(safe-area-inset-bott
 .chip.hit { background: var(--hit-soft); color: var(--hit); }
 .chip.miss { background: var(--miss-soft); color: var(--miss); }
 
-/* learn: hero */
-.hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px 18px; color: #fff; background: var(--grad); display: grid; gap: 10px; }
-.hero h1 { font-weight: 700; font-style: italic; max-width: 72%; }
-.hero p { opacity: .85; font-size: 14px; line-height: 20px; max-width: 70%; }
-.hero .meter { height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); overflow: hidden; }
-.hero .meter i { display: block; height: 100%; background: #fff; border-radius: 999px; }
-.hero-art { position: absolute; right: -6px; top: 14px; width: 108px; height: 108px; opacity: .95; }
-
-/* learn: path */
-.day { display: grid; gap: 6px; padding-top: 8px; }
-.day-h { display: flex; align-items: center; gap: 12px; }
-.day-h h2 { font-style: italic; font-weight: 700; white-space: nowrap; }
-.day-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.day-sub { color: var(--ink-muted); font-style: italic; font-size: 14px; }
-.path { display: grid; gap: 18px; padding: 52px 0 6px; }
-.node-row { display: flex; position: relative; }
-.node { --x: 0px; position: relative; margin: 0 auto; transform: translateX(var(--x)); width: 76px; height: 70px; border-radius: 50%; border: 0;
-  background: var(--line-strong); border-bottom: 7px solid color-mix(in srgb, var(--line-strong) 70%, #000); display: grid; place-items: center; color: var(--surface); }
-.node svg { width: 30px; height: 30px; fill: currentColor; }
-.node.done, .node.current { background: var(--signal); border-bottom-color: color-mix(in srgb, var(--signal) 65%, #000); color: #fff; }
-.node.current { outline: 4px solid var(--signal-soft); outline-offset: 5px; animation: float 2.4s ease-in-out infinite; }
-.node.locked { cursor: not-allowed; }
-.node:active:not(.locked) { transform: translateX(var(--x)) translateY(3px); border-bottom-width: 4px; }
-@keyframes float { 50% { translate: 0 -4px; } }
-.tip { position: absolute; left: 50%; bottom: calc(100% + 12px); transform: translateX(-50%); background: var(--surface); color: var(--signal-text);
-  border: 2px solid var(--line); border-radius: 12px; padding: 6px 14px; font: 600 15px/20px var(--f-sans); white-space: nowrap; pointer-events: none; }
-.tip::after { content: ""; position: absolute; left: 50%; top: 100%; width: 10px; height: 10px; background: var(--surface); border: 2px solid var(--line); border-top: 0; border-left: 0; transform: translate(-50%, -5px) rotate(45deg); }
-.locked-days { text-align: center; padding: 8px 0; }
-
 /* lesson overlay */
 .sheet { position: fixed; inset: 0; z-index: 20; background: var(--ground); display: flex; flex-direction: column; }
 .sheet.enter { animation: up .3s cubic-bezier(.2, .8, .2, 1); }
@@ -522,7 +493,6 @@ input[type=range] { width: 100%; accent-color: var(--signal); }
 .tapdots i { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
 .tapdots i.on { background: var(--rc); }
 @keyframes vpop { from { opacity: 0; transform: scale(.4); } }
-
 
 /* chest gifts in the 7-day ladder */
 .mini-chest { display: block; width: 34px; height: 30px; }
