@@ -49,24 +49,30 @@ export const I = {
   star: '<svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.5 7L12 17.5 5.7 21l1.5-7L2 9.3l7-.8z"/></svg>'
 };
 const n = (cur, goal, unit) => ({ left: cur >= goal ? '' : `${goal - cur} ${unit} to go`, ok: cur >= goal, cur: Math.min(cur, goal), goal });
+// xp: reward for unlocking, 10 for a first step up to 100 for the hardest (5 settled calls with Brier < 0.20)
 export const BADGES = [
-  { id: 'first_lesson', how: 'Open the Learn tab and finish any lesson.', name: 'First step', desc: 'Finished a lesson', icon: I.book, c: '#4C6FFF', prog: () => n(S.done.length, 1, 'lesson') },
-  { id: 'avatar', how: 'Tap your picture in Profile, build your avatar and press Done.', name: 'Looking sharp', desc: 'Made your avatar', icon: I.face, c: '#7A4FD6', prog: () => n(+S.avatarSet, 1, 'avatar') },
-  { id: 'first_trade', how: 'Open the Simulator, pick a market, set your odds and place a play-money trade.', name: 'First call', desc: 'Placed a play-money trade', icon: I.chart, c: '#0A6E78', prog: () => n(S.trades.length, 1, 'trade') },
-  { id: 'day1', how: 'Finish the Day 1 lessons, then pass the Day 1 quiz with at least 8 of 10.', name: 'Day 1 cleared', desc: 'Passed the Day 1 quiz', icon: I.crown, c: '#E0A33A', prog: () => n(+S.done.includes('d1r'), 1, 'check') },
-  { id: 'streak3', how: 'Do a lesson or a trade 3 days in a row.', name: 'On fire', desc: '3-day streak', icon: I.flame, c: '#FF7A1A', prog: () => n(S.bestStreak, 3, 'days') },
-  { id: 'streak7', how: 'Do a lesson or a trade 7 days in a row.', name: 'Week warrior', desc: '7-day streak', icon: I.flame, c: '#B93C0A', prog: () => n(S.bestStreak, 7, 'days') },
-  { id: 'days5', how: 'Learn on 5 different days. They don\u2019t have to be in a row.', name: 'Regular', desc: 'Learned on 5 different days', icon: I.cal, c: '#3B57F0', prog: () => n(S.days.length, 5, 'days') },
-  { id: 'lessons5', how: 'Finish 5 lessons in your 28-day plan.', name: 'Bookworm', desc: 'Finished 5 lessons', icon: I.book, c: '#0A6E78', prog: () => n(S.done.length, 5, 'lessons') },
-  { id: 'perfect', how: 'Score 10 out of 10 on any daily quiz.', name: 'Sharp mind', desc: '10/10 on a daily quiz', icon: I.star, c: '#E0A33A', prog: () => n(S.perfect, 1, 'perfect quiz') },
-  { id: 'settled', how: 'Place a trade in the Simulator and wait for the event to settle.', name: 'Moment of truth', desc: 'First call settled', icon: I.check, c: '#5E6573', prog: () => n(S.trades.filter(t => t.settled).length, 1, 'settled call') },
-  { id: 'calibrated', how: 'Get 5 calls settled and keep your Brier score under 0.20. Odds close to reality beat lucky guesses.', name: 'Calibrated', desc: '5 settled calls, Brier under 0.20', icon: I.target, c: '#7A4FD6', prog: () => { const st = stats(); return st.n >= 5 ? { ok: st.brier < .2, left: st.brier < .2 ? '' : 'Brier under 0.20', cur: 5, goal: 5 } : n(st.n, 5, 'settled calls'); } },
-  { id: 'curious', how: 'Ask your AI Coach any question.', name: 'Curious', desc: 'Asked your coach a question', icon: I.chat, c: '#4C6FFF', prog: () => n(S.asked, 1, 'question') }
+  { id: 'first_lesson', xp: 10, how: 'Open the Learn tab and finish any lesson.', name: 'First step', desc: 'Finished a lesson', icon: I.book, c: '#4C6FFF', prog: () => n(S.done.length, 1, 'lesson') },
+  { id: 'avatar', xp: 10, how: 'Tap your picture in Profile, build your avatar and press Done.', name: 'Looking sharp', desc: 'Made your avatar', icon: I.face, c: '#7A4FD6', prog: () => n(+S.avatarSet, 1, 'avatar') },
+  { id: 'first_trade', xp: 15, how: 'Open the Simulator, pick a market, set your odds and place a play-money trade.', name: 'First call', desc: 'Placed a play-money trade', icon: I.chart, c: '#0A6E78', prog: () => n(S.trades.length, 1, 'trade') },
+  { id: 'day1', xp: 25, how: 'Finish the Day 1 lessons, then pass the Day 1 quiz with at least 8 of 10.', name: 'Day 1 cleared', desc: 'Passed the Day 1 quiz', icon: I.crown, c: '#E0A33A', prog: () => n(+S.done.includes('d1r'), 1, 'check') },
+  { id: 'streak3', xp: 30, how: 'Do a lesson or a trade 3 days in a row.', name: 'On fire', desc: '3-day streak', icon: I.flame, c: '#FF7A1A', prog: () => n(S.bestStreak, 3, 'days') },
+  { id: 'streak7', xp: 75, how: 'Do a lesson or a trade 7 days in a row.', name: 'Week warrior', desc: '7-day streak', icon: I.flame, c: '#B93C0A', prog: () => n(S.bestStreak, 7, 'days') },
+  { id: 'days5', xp: 50, how: 'Learn on 5 different days. They don\u2019t have to be in a row.', name: 'Regular', desc: 'Learned on 5 different days', icon: I.cal, c: '#3B57F0', prog: () => n(S.days.length, 5, 'days') },
+  { id: 'lessons5', xp: 40, how: 'Finish 5 lessons in your 28-day plan.', name: 'Bookworm', desc: 'Finished 5 lessons', icon: I.book, c: '#0A6E78', prog: () => n(S.done.length, 5, 'lessons') },
+  { id: 'perfect', xp: 40, how: 'Score 10 out of 10 on any daily quiz.', name: 'Sharp mind', desc: '10/10 on a daily quiz', icon: I.star, c: '#E0A33A', prog: () => n(S.perfect, 1, 'perfect quiz') },
+  { id: 'settled', xp: 20, how: 'Place a trade in the Simulator and wait for the event to settle.', name: 'Moment of truth', desc: 'First call settled', icon: I.check, c: '#5E6573', prog: () => n(S.trades.filter(t => t.settled).length, 1, 'settled call') },
+  { id: 'calibrated', xp: 100, how: 'Get 5 calls settled and keep your Brier score under 0.20. Odds close to reality beat lucky guesses.', name: 'Calibrated', desc: '5 settled calls, Brier under 0.20', icon: I.target, c: '#7A4FD6', prog: () => { const st = stats(); return st.n >= 5 ? { ok: st.brier < .2, left: st.brier < .2 ? '' : 'Brier under 0.20', cur: 5, goal: 5 } : n(st.n, 5, 'settled calls'); } },
+  { id: 'curious', xp: 10, how: 'Ask your AI Coach any question.', name: 'Curious', desc: 'Asked your coach a question', icon: I.chat, c: '#4C6FFF', prog: () => n(S.asked, 1, 'question') }
 ];
+// Unlocks new badges and pays their XP. badgeXp records which badges were already paid, so badges earned before
+// badge XP existed get paid once too (quietly, without a toast).
 export function checkBadges() {
+  S.badgeXp = S.badgeXp || [];
+  let changed = false;
+  for (const id of S.badges) if (!S.badgeXp.includes(id)) { const b = BADGES.find(x => x.id === id); if (b) S.xp += b.xp; S.badgeXp.push(id); changed = true; }
   const fresh = BADGES.filter(b => !S.badges.includes(b.id) && b.prog().ok);
-  if (!fresh.length) return;
-  fresh.forEach(b => { S.badges.push(b.id); S.badgeAt[b.id] = new Date().toISOString(); }); save();
+  fresh.forEach(b => { S.badges.push(b.id); S.badgeAt[b.id] = new Date().toISOString(); S.badgeXp.push(b.id); S.xp += b.xp; });
+  if (fresh.length || changed) save();
   fresh.forEach((b, i) => setTimeout(() => toast(b), i * 1800));
 }
 export function tip(text) {
@@ -79,7 +85,7 @@ export function tip(text) {
 export function toast(b) {
   const t = document.createElement('div');
   t.className = 'toast'; t.setAttribute('role', 'status');
-  t.innerHTML = `<span class="medal sm" style="--c:${b.c}">${b.icon}</span><div><b>Badge unlocked</b><span class="small muted">${esc(b.name)}</span></div>`;
+  t.innerHTML = `<span class="medal sm" style="--c:${b.c}">${b.icon}</span><div><b>Badge unlocked \u00b7 +${b.xp} XP</b><span class="small muted">${esc(b.name)}</span></div>`;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2600);
 }

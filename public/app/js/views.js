@@ -50,11 +50,11 @@ export const VIEWS = {
     const seg = (a, b) => { const my = (a[1] + b[1]) / 2; return `M${a[0]} ${a[1]}C${a[0]} ${my} ${b[0]} ${my} ${b[0]} ${b[1]}`; };
     let walked = '', ahead = '';
     for (let k = 1; k < pts.length; k++) (pts[k - 1][2] && (pts[k][2] || (cur && k === pts.findIndex(p => !p[2])))) ? walked += seg(pts[k - 1], pts[k]) : ahead += seg(pts[k - 1], pts[k]);
-    const total = ALL.length, doneN = S.done.length;
+    const total = 28, doneN = COURSE.filter(d => d.nodes.every(n => S.done.includes(n.id))).length; // full days done out of the 28-day plan
     return `<section class="view">
       <div class="quest">
         <div><p class="eyebrow">28-day quest</p><h2>Prediction Markets</h2></div>
-        <div class="quest-meter"><span>${doneN}/${total}</span><i style="width:${Math.round(doneN / total * 100)}%"></i></div>
+        <div class="quest-meter" aria-label="${doneN} of ${total} days done"><span>Day ${doneN}/${total}</span><i style="width:${Math.round(doneN / total * 100)}%"></i></div>
       </div>
       <div class="map" style="height:${y + 40}px">
         <svg class="road" viewBox="0 0 100 ${y + 40}" preserveAspectRatio="none" aria-hidden="true">

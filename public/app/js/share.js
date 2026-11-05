@@ -14,6 +14,7 @@ export function openBadge(b) {
     <div class="av-top"><button class="x" data-close aria-label="Close">×</button><span></span><span></span></div>
     <div class="badge-hero${p.got ? '' : ' off'}"><span class="medal xl" style="--c:${b.c}">${b.icon}</span>
       <h2>${esc(b.name)}</h2>
+      <p class="chip xp-chip">+${b.xp} XP</p>
       ${p.got ? `<p class="chip hit">${esc(fmtDate(S.badgeAt[b.id]))}</p><p class="muted">${esc(b.desc)}</p>`
         : `<p class="chip">Locked</p>`}
     </div>
