@@ -150,7 +150,7 @@ export function gate(startStep) {
     try {
       if (what === 'nemail') {
         email = val('g-email').trim().toLowerCase();
-        const r = await api('signup', Object.assign({ email, plan }, prof));
+        const r = await api('signup', Object.assign({ email, plan, promo: promoLeft() > 0 }, prof));
         if (!r.ok) { err = ERR[r.error] || 'Something went wrong. Try again.'; return view(); }
         if (r.next === 'password') { isNew = false; go('password'); tip('You already have an account. Sign in with your password.'); return; }
         resendAt = Date.now() + 60000;

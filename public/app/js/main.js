@@ -1,7 +1,8 @@
 // Entry point: global click handlers and boot.
 import { openAvatar } from './avatar.js';
+import { buyCoachPlus, openBilling } from './billing.js';
 import { openChest } from './chest.js';
-import { COACH_HELLO, coachBusy, coachReply } from './coach.js';
+import { COACH_HELLO, coachLocked, coachReply, loadCoachLeft } from './coach.js';
 import { ALL } from './course.js';
 import { adopt, api, gate, getToken, loadProgress, setToken } from './gate.js';
 import { bonusLeft, openGifts, openStreak, paintPerks } from './perks.js';
@@ -38,12 +39,14 @@ document.addEventListener('click', e => {
   if (e.target.closest('[data-ranks]')) { openRanks(); return; }
   const bd = e.target.closest('[data-badge]'); if (bd) { openBadge(BADGES.find(b => b.id === bd.dataset.badge)); return; }
   if (e.target.closest('[data-settings]')) { openSettings(); return; }
+  if (e.target.closest('[data-billing]')) { openBilling(); return; }
+  if (e.target.closest('[data-coach-plus]')) { buyCoachPlus().then(ok => { if (ok) loadCoachLeft(route); }); return; }
 });
 document.addEventListener('submit', e => {
   if (e.target.id === 'askf') { e.preventDefault(); const v = $('#askq').value.trim(); if (v) ask(v); }
 });
 async function ask(q) {
-  if (coachBusy) return;
+  if (coachLocked()) return;
   if (!S.chat.length) S.chat.push({ me: false, text: COACH_HELLO });
   S.chat.push({ me: true, text: q });
   const pending = coachReply(q); // sets coachBusy, so the screen shows the typing dots

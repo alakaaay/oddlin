@@ -1,6 +1,7 @@
 // Hash router for the five tabs, with placeholders for sections still in development.
 import { loadBoard } from './board.js';
 import { loadSim } from './sim.js';
+import { loadCoachLeft } from './coach.js';
 import { ALL, nextNode } from './course.js';
 import { paintPerks } from './perks.js';
 import { $ } from './util.js';
@@ -30,6 +31,6 @@ export function route() {
   if (v === 'learn') { const c = $('.lvl.current'); if (c) c.scrollIntoView({ block: 'center' }); } else window.scrollTo(0, 0);
   if (v === 'board') loadBoard();
   if (v === 'sim') loadSim();
-  if (v === 'ai') { const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
+  if (v === 'ai') { loadCoachLeft(route); const c = $('#chat'); c.lastElementChild && c.lastElementChild.scrollIntoView({ block: 'nearest' }); }
 }
 addEventListener('hashchange', route);

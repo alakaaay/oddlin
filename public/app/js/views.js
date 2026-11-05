@@ -4,7 +4,7 @@ import { ALL, CHEST, COURSE, TEST_UNLOCK, UPCOMING, nextNode } from './course.js
 import { AVG_MIN, BADGES, LEARNERS, level } from './progression.js';
 import { fmtDate } from './share.js';
 import { boardTab } from './board.js';
-import { COACH_HELLO, COACH_SUGGEST, coachBusy } from './coach.js';
+import { COACH_HELLO, COACH_SUGGEST, coachBusy, coachLocked, coachMeter } from './coach.js';
 import { simView, stats } from './sim.js';
 import { S } from './state.js';
 import { $, ICON, esc } from './util.js';
@@ -79,8 +79,9 @@ export const VIEWS = {
       </div>
       <p class="disc">Brier score: 0 is perfect, 0.25 is a coin flip. Lower is better.</p>
       <div class="chat" id="chat" aria-live="polite">${chat.map(m => `<div class="msg ${m.me ? 'me' : 'coach'}">${esc(m.text)}</div>`).join('')}${coachBusy ? '<div class="msg coach typing" aria-label="Coach is typing"><i></i><i></i><i></i></div>' : ''}</div>
-      <div class="sugg">${COACH_SUGGEST.map(q => `<button data-ask="${esc(q)}" ${coachBusy ? 'disabled' : ''}>${esc(q)}</button>`).join('')}</div>
-      <form class="ask" id="askf"><input id="askq" placeholder="Ask about a lesson or your trades" autocomplete="off" maxlength="500" aria-label="Ask your coach"><button class="btn" aria-label="Send" ${coachBusy ? 'disabled' : ''}>↑</button></form>
+      <div class="sugg">${COACH_SUGGEST.map(q => `<button data-ask="${esc(q)}" ${coachLocked() ? 'disabled' : ''}>${esc(q)}</button>`).join('')}</div>
+      <form class="ask" id="askf"><input id="askq" placeholder="${coachLocked() && !coachBusy ? 'Back tomorrow' : 'Ask about a lesson or your trades'}" autocomplete="off" maxlength="500" aria-label="Ask your coach" ${coachLocked() && !coachBusy ? 'disabled' : ''}><button class="btn" aria-label="Send" ${coachLocked() ? 'disabled' : ''}>↑</button></form>
+      ${coachMeter()}
       <p class="disc">The coach only knows the Oddlin course and your demo trades. Educational only, not financial advice.</p>
     </section>`;
   },
@@ -170,7 +171,7 @@ export const VIEWS = {
       <div class="card"><h3>My plan</h3><div class="list">
         <div class="li"><span>Daily time</span><span class="muted">${esc(S.minutes)} min</span></div>
         <div class="li"><span>Topics</span><span class="muted">${esc(S.topics.join(', '))}</span></div>
-        <div class="li"><span>Subscription</span><span class="muted">${S.sub === 'active' ? 'Active (demo)' : 'Canceled (demo)'}</span></div>
+        <button class="li row-btn" data-billing><span>Subscriptions & billing</span><span class="chev" aria-hidden="true">›</span></button>
       </div></div>
       <div class="card"><h3>Ready for real markets?</h3><p class="muted small">Finish the 28 days and keep your Brier score under 0.20 first. Oddlin never holds your money or trades for you.</p></div>
     </section>`;

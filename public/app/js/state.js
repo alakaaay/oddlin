@@ -4,7 +4,7 @@ import { $, AV_DEFAULT, KEY, MAX_FREEZE, SIM_START, START_BALANCE, addDays, dayG
 
 export function fresh() {
   return { name: 'You', balance: START_BALANCE, simCash: SIM_START, xp: 0, streak: 0, lastActive: null, done: [], trades: [], chat: [], topics: ['The Fed', 'Inflation', 'Jobs'], minutes: 10,
-    avatar: Object.assign({}, AV_DEFAULT), avatarSet: false, theme: 'system', sub: 'active', email: 'you@example.com', days: [], bestStreak: 0, learnSec: 0, perfect: 0, asked: 0, badges: [], badgeAt: {}, stars: {}, chests: [],
+    avatar: Object.assign({}, AV_DEFAULT), avatarSet: false, theme: 'system', email: 'you@example.com', days: [], bestStreak: 0, learnSec: 0, perfect: 0, asked: 0, badges: [], badgeAt: {}, stars: {}, chests: [],
     freezes: MAX_FREEZE, frozen: [], gift: { n: 0, last: null }, bonusAt: 0, quizTries: {} };
 }
 // One shared object for the whole app. Replaced in place (never reassigned) so every module keeps the same reference.

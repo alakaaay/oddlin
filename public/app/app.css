@@ -675,3 +675,31 @@ button.lrow:focus-visible { outline: 2px solid var(--signal); outline-offset: -2
 .trust-i svg { width: 20px; height: 20px; flex: none; color: var(--hit); }
 .trust-pay { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; align-content: center; justify-items: center; padding: 10px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); }
 .trust-pay img { width: 100%; max-width: 44px; height: auto; display: block; }
+
+/* AI Coach daily limit */
+.coach-left { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--ink-muted); margin-top: -4px; }
+.coach-left.out { color: var(--miss); }
+.coach-dots { display: inline-flex; gap: 3px; }
+.coach-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.coach-dots i.on { background: var(--signal); }
+
+/* Billing: subscriptions, charge history, Coach Plus offer */
+.sub-card { display: grid; gap: 4px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.sub-card:last-of-type { border-bottom: 0; }
+.sub-card .kv { align-items: center; }
+.sub-card .chip { font-size: 11px; padding: 2px 8px; }
+.sub-card.ended { opacity: .6; }
+.sub-card .link { justify-self: start; margin-top: 4px; font-size: 14px; }
+.link.danger { color: var(--miss); }
+.sub-ask { display: grid; gap: 8px; margin-top: 6px; padding: 10px 12px; border-radius: var(--r-md); background: var(--ground); border: 1px solid var(--line); }
+.two-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.li.charge > span { display: grid; gap: 2px; text-align: left; }
+.li.charge b.mono { white-space: nowrap; }
+.plus-offer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--signal); background: var(--signal-soft); color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.plus-offer > span:nth-child(2) { display: grid; gap: 2px; }
+.plus-offer.slim { padding: 10px 12px; }
+.plus-ic { font-size: 22px; line-height: 1; }
+.modal-ic.plus-ic { font-size: 40px; }
+.two-btn .btn { min-height: 40px; }
+.sub-card .kv b { font: 600 16px/22px var(--f-sans); }

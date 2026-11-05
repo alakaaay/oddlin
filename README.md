@@ -39,7 +39,8 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `lib/ai.js` | Gemini API call with JSON output |
 | `lib/review.js`, `db/reviews.sql` | AI review of one contract, cached for a day |
 | `lib/coach.js`, `db/coach.sql`, `lib/course-digest.json` | AI Coach; the course text is built by `scripts/course-digest.js` |
-| `api/markets.js`, `api/trade.js`, `api/review.js`, `api/coach.js` | The same endpoints as Vercel functions |
+| `lib/billing.js`, `db/billing.sql` | Subscriptions, charge history, Coach Plus |
+| `api/markets.js`, `api/trade.js`, `api/review.js`, `api/coach.js`, `api/billing.js` | The same endpoints as Vercel functions |
 | `vercel.json` | Redirects `/` to `/quiz` on Vercel |
 | `public/css/tokens.css` | Tokens as CSS variables |
 | `public/css/app.css` | Quiz styles |
@@ -117,7 +118,8 @@ Sign-in to `/app` (`POST /api/auth`, one endpoint with an `action`, logic in `li
 - **Markets** (`GET /api/markets?platform=kalshi|polymarket&cat=…&q=…`): public read-only APIs, no keys. Top by 24h volume, sports and crypto left out, prices 2–98¢ only. Kalshi has no sort or category filter, so `lib/kalshi-series.json` lists 20 series per category (rebuild: `node scripts/kalshi-series.js`). Cached 2 minutes.
 - **Trades** (`POST /api/trade`): demo dollars, $1,000 to start, separate from coins. The server locks the live ask on open and the live bid on sell. There is no cron: open trades settle when their owner lists them and the market has resolved. The demo-trader leaderboard ranks closed P&L (top 50 plus your own place) and opens any trader's history.
 - **AI review** (`POST /api/review`): opening a contract shows an AI odds range, expected value per contract (with the AI's odds and with the player's), reasons for YES and for NO, and what to watch. One model call per market per UTC day, stored in `ai_reviews` and shared by all players.
-- **AI Coach** (`POST /api/coach`): answers only about the course (`lib/course-digest.json`) and the player's own trades and progress, which the server reads itself. Anything else gets "I don't know". 30 questions per player per day (`coach_usage`). Rebuild the course text after editing lessons: `node scripts/course-digest.js`.
+- **AI Coach** (`POST /api/coach`): answers only about the course (`lib/course-digest.json`) and the player's own trades and progress, which the server reads itself. Anything else gets "I don't know". 10 questions per player per day (`coach_usage`), 20 with Coach Plus, shown under the chat input. Rebuild the course text after editing lessons: `node scripts/course-digest.js`.
+- **Billing** (`POST /api/billing`, `lib/billing.js`, `db/billing.sql`): `subscriptions` and `charges`. The quiz purchase and the app sign-up start the main plan with its first charge (50% off while the promo timer runs). Coach Plus ($10 every 4 weeks, +10 coach questions a day) is bought in the AI Coach tab. Profile → Subscriptions & billing lists every subscription (cancel keeps access to the end of the period, resume undoes it) and the full charge history. No cron: renewals due since the last look are billed when the screen loads. Beta: no payment provider, no money is taken; prices in `lib/billing.js` must match the paywalls.
 - Neither AI feature tells anyone to buy or sell. Env: `GEMINI_API_KEY` (server only), optional `GEMINI_MODEL` (default `gemini-3.1-flash-lite`).
 
 ## Email

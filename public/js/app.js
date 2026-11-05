@@ -554,7 +554,7 @@ const RENDER = {
         track('track', 'Purchase', Object.assign(product([planId(p)], p.name, 0), { plan_price: priceOf(p), promo: promoOn() }), { value: priceOf(p) });
         // Creates the app account (status pending) for the quiz email with the quiz answers as its profile; the app asks for this email on first sign-in
         if (state.email) {
-          post('/api/purchase', { email: state.email, session_id: window.oddlinSession, plan: planId(p), answers: { events: state.ans.events, time: state.ans.time, experience: state.ans.experience } });
+          post('/api/purchase', { email: state.email, session_id: window.oddlinSession, plan: planId(p), promo: promoOn(), answers: { events: state.ans.events, time: state.ans.time, experience: state.ans.experience } });
           try { localStorage.setItem('oddlin_signup_email', state.email); } catch (e) {}
         }
         next();
