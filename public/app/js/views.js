@@ -152,6 +152,40 @@ export const VIEWS = {
     </section>`;
   },
 
+  // Real trading (coming soon): connect your own Kalshi / Polymarket account and trade from Oddlin for a small fee.
+  // "Remind me first" is saved as S.realInterest (timestamp) with the player's progress.
+  real() {
+    const on = !!S.realInterest;
+    const step = (n, title, text) => `<li><span class="real-n">${n}</span><span><b>${title}</b><span class="muted small">${text}</span></span></li>`;
+    return `<section class="view real-page">
+      <a class="back-link" href="#/sim">‹ Simulator</a>
+      <div class="real-hero">
+        <p class="eyebrow">Real trading <span class="tool-soon">Soon</span></p>
+        <h1>Trade for real, the Oddlin way</h1>
+        <p>Keep the simple screens you learned on. Your money stays in your own Kalshi or Polymarket account.</p>
+      </div>
+      <div class="card"><h3>How it will work</h3>
+        <ol class="real-steps">
+          ${step(1, 'Open an account', 'Sign up with Kalshi, Polymarket, or both, where they’re available to you.')}
+          ${step(2, 'Connect it to Oddlin', 'Link your account in a few taps. Oddlin never holds your money.')}
+          ${step(3, 'Trade in plain English', 'Same simple tickets as the simulator: your odds, max loss and payout before you buy.')}
+          ${step(4, 'Pay a small fee', 'A small Oddlin fee per trade, always shown before you tap Buy.')}
+        </ol>
+      </div>
+      <div class="card real-safe">
+        <div><span aria-hidden="true">🔒</span><span>Your money stays with the platform, never with Oddlin.</span></div>
+        <div><span aria-hidden="true">🧾</span><span>Every fee is shown up front. No hidden costs.</span></div>
+        <div><span aria-hidden="true">🎓</span><span>Practice in the simulator first. Real trades can lose money.</span></div>
+      </div>
+      <div class="card arb-soon"><h3>Not ready yet</h3>
+        <p class="muted small">We’re building real trading now. Want to be first in line?</p>
+        <button class="btn ${on ? 'ghost' : 'gold'} arb-notify" data-real-notify ${on ? 'disabled' : ''}>${on ? '✓ We’ll remind you first' : 'Remind me first when it’s ready'}</button>
+        ${on ? '<p class="disc center">You’ll be among the first to know, right here in the app.</p>' : ''}
+      </div>
+      <p class="disc">Not available yet. Educational only, not financial advice. Prediction markets involve risk of loss.</p>
+    </section>`;
+  },
+
   sim() { return simView(); },
 
   board() {

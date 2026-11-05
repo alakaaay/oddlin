@@ -1,4 +1,6 @@
 // Simulator: live Kalshi and Polymarket markets, traded with play money.
+// Home: one wallet card (cash, in trades, P&L), a "Buy a contract" button (opens the market browser with search), then My contracts as a compact list
+// with P&L; a row opens the contract's details (and Sell). Buying opens the market browser (simTab 'browse').
 // Markets come from GET /api/markets (sports and crypto left out, hottest first by 24h volume).
 // Trades go through POST /api/trade: the server locks the live price, sells at the live bid and settles resolved
 // markets. Payouts are added to the player's coins here, once per trade, then acknowledged to the server.
@@ -12,8 +14,8 @@ const PLATFORMS = [['polymarket', 'Polymarket'], ['kalshi', 'Kalshi']];
 const AMOUNTS = [10, 25, 50, 100];
 const CACHE_MS = 60 * 1000;
 
-export let simTab = 'markets';
-export function setSimTab(v) { simTab = v; }
+export let simTab = 'home'; // 'home' (wallet + my contracts) or 'browse' (buy: search and live markets)
+export function setSimTab(v) { simTab = v === 'browse' || v === 'markets' ? 'browse' : 'home'; }
 let cat = 'hot', query = '', events = [], categories = [], openEvents = new Set();
 const listCache = new Map();
 const platform = () => (S.simPlatform === 'kalshi' ? 'kalshi' : 'polymarket');
@@ -42,31 +44,38 @@ async function getReview(e, m, title) {
     return r;
   } catch (err) { return { ok: false, error: 'network' }; }
 }
-const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
-function reviewCard(rv, side, price, shares, est) {
-  if (!rv) return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion</p><p class="small muted ai-loading">Reading the market rules and prices…</p></div>`;
-  if (!rv.ok || !rv.review) return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion</p><p class="small muted">AI review isn’t available right now. <button class="link" data-review-retry>Try again</button></p></div>`;
+// AI opinion in the ticket: price vs AI odds bars, a plain verdict for the chosen side, short reasons both ways
+function reviewCard(rv, side, price) {
+  const head = conf => `<div class="aiop-head"><span class="aiop-ic" aria-hidden="true">✨</span><b>AI opinion</b>${conf ? `<span class="ai-conf ${conf}">${conf} confidence</span>` : ''}</div>`;
+  if (!rv) return `<div class="card aiop">${head()}<p class="small muted ai-loading">Reading the news and the market rules…</p></div>`;
+  if (!rv.ok || !rv.review) return `<div class="card aiop">${head()}<p class="small muted">AI opinion isn’t available right now. <button class="link" data-review-retry>Try again</button></p></div>`;
   const r = rv.review, mid = Math.round((r.ai_low + r.ai_high) / 2), pc = Math.round(price * 100);
-  const win = p => (side === 'yes' ? p : 100 - p);           // chance this side wins, in %
-  const evAi = win(mid) - pc, evYou = win(est) - pc;          // cents per contract
-  const evText = n => `<b class="${n > 0 ? 'pos' : n < 0 ? 'neg' : ''}">${signed(n)}¢</b>`;
-  const list = (h, a, cls) => a.length ? `<p class="ai-h ${cls}">${h}</p><ul>${a.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
-  return `<div class="card ai-review"><p class="eyebrow">3 · AI second opinion <span class="ai-conf ${r.confidence}">${r.confidence} confidence</span></p>
-    <p class="small">${esc(r.summary)}</p>
-    <div class="kv"><span>AI thinks YES has</span><b>${r.ai_low}–${r.ai_high}%</b></div>
-    <div class="ai-ev"><p class="small muted">Expected value of one ${side.toUpperCase()} contract at ${pc}¢</p>
-      <div class="kv"><span>AI: ${side.toUpperCase()} wins ${win(mid)}%</span>${evText(evAi)}</div>
-      <div class="kv"><span>You: ${side.toUpperCase()} wins ${win(est)}%</span>${evText(evYou)}</div>
-      <div class="kv"><span>Your ${shares} contracts, AI odds</span><b class="${evAi > 0 ? 'pos' : evAi < 0 ? 'neg' : ''}">${evAi < 0 ? '−' : evAi > 0 ? '+' : ''}${usd(Math.abs(evAi * shares) / 100)}</b></div>
-      <p class="small muted">Expected value = chance to win × $1 − price. Positive means the side looks cheap if those odds are right.</p></div>
-    ${list('Case for YES', r.yes_reasons, 'yes')}${list('Case for NO', r.no_reasons, 'no')}${list('What to watch', r.watch, '')}
+  const aiSide = side === 'yes' ? mid : 100 - mid, lo = side === 'yes' ? r.ai_low : 100 - r.ai_high, hi = side === 'yes' ? r.ai_high : 100 - r.ai_low;
+  const gap = aiSide - pc;
+  const verdict = gap >= 5 ? ['cheap', '👍', `${side.toUpperCase()} looks cheap`, `The AI thinks ${side.toUpperCase()} is more likely than its price says.`]
+    : gap <= -5 ? ['pricey', '👎', `${side.toUpperCase()} looks pricey`, `The AI thinks ${side.toUpperCase()} is less likely than its price says.`]
+    : ['fair', '🤝', 'Fair price', 'The AI and the price roughly agree.'];
+  const list = (a, cls) => a.slice(0, 2).map(x => `<li class="${cls}">${esc(x)}</li>`).join('');
+  return `<div class="card aiop">${head(r.confidence)}
+    <p class="aiop-sum">${esc((String(r.summary).match(/^.*?[.!?](\s|$)/) || [r.summary])[0].trim())}</p>
+    <div class="sig-bars" role="img" aria-label="Chance of ${side.toUpperCase()}: price ${pc}%, AI ${lo} to ${hi}%">
+      <p class="small muted">Chance of ${side.toUpperCase()}</p>
+      <div class="sig-bar"><span>Price says</span><span class="track"><i style="width:${pc}%"></i></span><b class="mono">${pc}%</b></div>
+      <div class="sig-bar ai"><span>AI says</span><span class="track range"><i style="width:${aiSide}%"></i><em style="left:${lo}%;width:${Math.max(2, hi - lo)}%"></em></span><b class="mono">${lo === hi ? lo : `${lo}–${hi}`}%</b></div>
+    </div>
+    <div class="aiop-verdict ${verdict[0]}"><span class="aiop-emo" aria-hidden="true">${verdict[1]}</span><span><b>${verdict[2]}</b><span>${verdict[3]}${gap >= 5 ? ` About ${gap}¢ per $1 contract.` : ''}</span></span></div>
+    <div class="aiop-why">
+      <div><p class="aiop-h yes">Why it could happen</p><ul>${list(r.yes_reasons, 'yes')}</ul></div>
+      <div><p class="aiop-h no">Why it might not</p><ul>${list(r.no_reasons, 'no')}</ul></div>
+    </div>
+    ${r.watch && r.watch[0] ? `<p class="aiop-watch"><span aria-hidden="true">👀</span>Watch: ${esc(r.watch[0])}</p>` : ''}
     <p class="disc">AI estimate, updated once a day. It can be wrong and isn’t financial advice.</p></div>`;
 }
 const TRADE_ERR = {
   market_closed: 'This market just closed or moved out of range. Pick another one.',
   amount_too_small: 'The amount is too small for this price.',
   no_buyers: 'Nobody is buying right now. Try again in a minute.',
-  already_settled: 'This market already settled. Your result is in My calls.',
+  already_settled: 'This market already settled. Your result is in My contracts.',
   market_unavailable: 'Couldn’t reach the market. Try again in a minute.',
   signed_out: 'Your session ended. Sign in again.',
   network: 'No connection. Check your internet and try again.'
@@ -87,25 +96,32 @@ export function stats(list = S.trades) {
 
 // ── view ──
 export function simView() {
-  const open = mine().filter(t => t.status === 'open').length;
-  return `<section class="view sim">
-    <div><p class="eyebrow">Simulator · play money</p><h1>Practice on live events</h1></div>
+  if (simTab === 'browse') return `<section class="view sim">
+    <button class="back-link link-btn" data-seg="home">‹ My contracts</button>
+    <div><p class="eyebrow">Buy a contract</p><h1>Live markets</h1></div>
     <div class="seg plat" role="group" aria-label="Data source">${PLATFORMS.map(([id, name]) => `<button data-plat="${id}" aria-pressed="${platform() === id}">${name}</button>`).join('')}</div>
+    <label class="sim-search"><span class="sr">Search markets</span><input id="sim-q" type="search" placeholder="Search ${platformName(platform())} markets" value="${esc(query)}" autocomplete="off"></label>
+    <div class="cat-chips" role="group" aria-label="Category" ${query ? 'hidden' : ''}>${(categories.length ? categories : [{ id: 'hot', label: 'Hot' }]).map(c => `<button data-cat="${c.id}" aria-pressed="${c.id === cat}">${esc(c.label)}</button>`).join('')}</div>
+    <div id="sim-list"><p class="muted small center">Loading live markets…</p></div>
+    <p class="disc">Live prices from ${platformName(platform())}, refreshed every 2 minutes. Sports and crypto are left out. Demo money only.</p>
+  </section>`;
+  return `<section class="view sim">
+    <div><p class="eyebrow">Simulator · demo money</p><h1>Practice on live events</h1></div>
     <div id="sim-wallet">${walletCard()}</div>
-    <div class="seg" role="group"><button data-seg="markets" aria-pressed="${simTab === 'markets'}">Markets</button><button data-seg="mine" aria-pressed="${simTab === 'mine'}">My calls${open ? ` (${open})` : ''}</button></div>
-    ${simTab === 'markets' ? `
-      <label class="sim-search"><span class="sr">Search markets</span><input id="sim-q" type="search" placeholder="Search ${platformName(platform())} markets" value="${esc(query)}" autocomplete="off"></label>
-      <div class="cat-chips" role="group" aria-label="Category" ${query ? 'hidden' : ''}>${(categories.length ? categories : [{ id: 'hot', label: 'Hot' }]).map(c => `<button data-cat="${c.id}" aria-pressed="${c.id === cat}">${esc(c.label)}</button>`).join('')}</div>
-      <div id="sim-list"><p class="muted small center">Loading live markets…</p></div>
-      <p class="disc">Live prices from ${platformName(platform())}, refreshed every 2 minutes. Sports and crypto are left out. Play money only: no real money is used.</p>`
-    : '<div id="sim-mine"><p class="muted small center">Loading your calls…</p></div>'}
+    <a class="real-card" href="#/real">
+      <span class="real-ic" aria-hidden="true">🚀</span>
+      <span class="real-txt"><b>Ready for real trades?</b><span>Open an account and start</span></span>
+      <span class="chev" aria-hidden="true">›</span>
+    </a>
+    <button class="btn buy-btn" data-seg="browse">Buy a contract</button>
+    <div id="sim-mine">${mineList()}</div>
   </section>`;
 }
 
-// Markets tab also refreshes the trades in the background so the wallet shows live P&L
+// Home refreshes the trades (live prices for P&L); browse loads the markets
 export function loadSim() {
   if (!S.simIntroSeen) showIntro();
-  return simTab === 'markets' ? (loadMarkets(), refreshTrades()) : loadMine();
+  return simTab === 'browse' ? loadMarkets() : refreshTrades();
 }
 
 // Small popup used for the first-visit disclaimer and the P&L explainer
@@ -128,45 +144,86 @@ function showIntro() {
       <li>We never touch your money: no card, no deposits, no real trades.</li>
       <li>Prices are real and come from live markets, so your calls play out like the real thing.</li>
       <li>Wins and losses only change your demo balance.</li>
-    </ul>`, 'Got it, let\u2019s practice', () => { S.simIntroSeen = true; save(); });
+    </ul>`, 'Got it, let\u2019s practice', () => { S.simIntroSeen = true; save(); if (ctaAfterIntro) { ctaAfterIntro = false; showScanCta(); } });
+}
+let ctaAfterIntro = false;
+// After the first demo trade: point to the AI Scanner (never promise a result: "good trade", "looks cheap")
+function showScanCta() {
+  S.scanCtaSeen = true; save();
+  const m = $('#modal');
+  m.innerHTML = `<div class="modal-back" data-modal-close><div class="modal scan-cta" role="dialog" aria-modal="true" aria-labelledby="sc-t">
+    <div class="scan-cta-ic" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" class="ring"/><circle cx="24" cy="24" r="11" class="ring"/><path d="M24 24 L24 6 A18 18 0 0 1 39.6 15 Z" class="sweep"/><circle cx="33" cy="17" r="2.2" class="blip"/></svg></div>
+    <h2 id="sc-t">Your first demo trade! 🎉</h2>
+    <p class="muted">Want a hand picking the next one? Ask the AI to find you a good trade: it checks live markets and shows where the price looks too low, with simple reasons.</p>
+    <button class="btn gold" data-scan-cta>Find me a good trade</button>
+    <button class="btn ghost" data-modal-close>Maybe later</button></div></div>`;
+  const close = () => { m.innerHTML = ''; m.onclick = null; document.removeEventListener('keydown', onKey); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', onKey);
+  m.onclick = e => {
+    if (e.target.closest('[data-scan-cta]')) { close(); location.hash = '#/scanner'; return; }
+    if (e.target.matches('[data-modal-close]') || e.target.closest('button[data-modal-close]')) close();
+  };
+  setTimeout(() => { const b = m.querySelector('[data-scan-cta]'); if (b) b.focus(); }, 30);
 }
 function showPnlInfo() {
   infoModal(`<h2>What is P&amp;L?</h2>
-    <p class="muted">How much demo money you’ve made or lost on ${platformName(platform())}.</p>
+    <p class="muted">How much demo money you’ve made or lost, on Kalshi and Polymarket together.</p>
     <ul class="intro-list">
       <li>Closed trades: what you got back.</li>
       <li>Open trades: what they’re worth now.</li>
-      <li>%: profit for every $100 you traded.</li>
+      <li>%: how much you gained or lost for every $100 you put in.</li>
     </ul>`, 'Got it', null, 'compact');
 }
 
-// Trades of the platform on screen: Kalshi and Polymarket are kept apart everywhere
-const mine = () => S.trades.filter(t => t.platform === platform());
 const costOf = t => t.shares * t.price;
 // What a trade is worth now: payout once closed, live bid while open (or its cost when no live price came back)
 const valueOf = t => t.status === 'won' ? t.shares : t.status === 'lost' ? 0 : t.status === 'sold' ? t.shares * t.exit_price
   : t.now != null ? t.shares * Number(t.now) : costOf(t);
+const money = n => `${n >= 0 ? '+' : '\u2212'}${usd(Math.abs(n))}`;
+const pctOf = (pnl, cost) => (cost > 0 ? `${pnl >= 0 ? '+' : '\u2212'}${Math.abs(pnl / cost * 100).toFixed(1)}%` : '');
+const tone = n => (n > 0.004 ? 'up' : n < -0.004 ? 'down' : '');
+
+// One card: cash, in trades and P&L for all demo trades on both platforms
 function walletCard() {
-  const ts = mine(), open = ts.filter(t => t.status === 'open');
+  const ts = S.trades, open = ts.filter(t => t.status === 'open');
   const pnl = ts.reduce((a, t) => a + valueOf(t) - costOf(t), 0);
   const invested = ts.reduce((a, t) => a + costOf(t), 0);
-  const pct = invested > 0 ? pnl / invested * 100 : 0; // return on the demo money put into trades
   const inTrades = open.reduce((a, t) => a + valueOf(t), 0);
-  const sign = pnl > 0.004 ? 'up' : pnl < -0.004 ? 'down' : '';
-  return `<div class="wallet">
-    <div><span class="small muted">Cash <i class="demo-tag">DEMO</i></span><b class="mono">${usd(S.simCash)}</b></div>
-    <div><span class="small muted">In trades <i class="demo-tag">DEMO</i></span><b class="mono">${usd(inTrades)}</b></div>
-    <div class="pnl ${sign}"><span class="small muted">P&amp;L <button class="info-btn" data-pnl-info aria-label="What is P&amp;L?">i</button></span>
-      <b class="mono">${pnl >= 0 ? '+' : '\u2212'}${usd(Math.abs(pnl))} <span class="pct">${pct >= 0 ? '+' : '\u2212'}${Math.abs(pct).toFixed(1)}%</span></b></div>
+  return `<div class="card wallet1">
+    <div class="w-head"><i class="demo-tag">DEMO</i><span class="small muted">Demo money, never real</span></div>
+    <div class="w-row">
+      <div><span class="small muted">Cash</span><b class="mono">${usd(S.simCash)}</b></div>
+      <div><span class="small muted">In trades</span><b class="mono">${usd(inTrades)}</b></div>
+      <div class="w-pnl ${tone(pnl)}"><span class="small muted">P&amp;L <button class="info-btn" data-pnl-info aria-label="What is P&amp;L?">i</button></span><b class="mono">${money(pnl)}</b><span class="w-pct">${pctOf(pnl, invested) || '0.0%'}</span></div>
+    </div>
   </div>`;
 }
+
+// My contracts: open first, then closed; each row shows only the title, side and P&L
+function mineList() {
+  const open = S.trades.filter(t => t.status === 'open').length;
+  const head = `<div class="mine-head"><h3>My contracts</h3>${S.trades.length ? `<span class="small muted">${open} open · ${S.trades.length - open} closed</span>` : ''}</div>`;
+  const ts = S.trades.slice().sort((a, b) => (a.status === 'open') === (b.status === 'open') ? String(b.opened_at).localeCompare(String(a.opened_at)) : a.status === 'open' ? -1 : 1);
+  if (!ts.length) return head + `<div class="card empty-mine"><p class="muted small">No contracts yet. Tap Buy a contract, set your odds and buy with demo money.</p></div>`;
+  return head + `<div class="card mine-card">${ts.map(t => {
+    const pnl = valueOf(t) - costOf(t), st = t.status === 'open' ? '' : t.status === 'sold' ? 'Sold' : t.status === 'won' ? 'Won' : 'Lost';
+    return `<button class="c-row" data-contract="${t.id}">
+      <span class="c-main"><b>${esc(t.title)}</b><span class="c-meta"><span class="sig-side ${t.side}">${t.side.toUpperCase()}</span>${st ? `<span class="c-st ${t.status}">${st}</span>` : ''}</span></span>
+      <span class="c-pnl ${tone(pnl)}"><b class="mono">${money(pnl)}</b><span>${pctOf(pnl, costOf(t))}</span></span>
+    </button>`;
+  }).join('')}</div>
+  <p class="disc">Open contracts settle on their own when the event ends. You can also sell early at the live price.</p>`;
+}
+function paintMine() { const b = $('#sim-mine'); if (b) b.innerHTML = mineList(); }
+
 function paintWallet() { const w = $('#sim-wallet'); if (w) w.innerHTML = walletCard(); }
 async function refreshTrades() {
   const r = await post({ action: 'list' });
-  if (!r.ok) return;
+  if (!r.ok) { const b = $('#sim-mine'); if (b && !S.trades.length) b.innerHTML = `<div class="card"><p class="muted small">${esc(TRADE_ERR[r.error] || 'Contracts didn’t load. Try again in a minute.')}</p><button class="btn ghost" data-retry>Try again</button></div>`; return; }
   creditClosed(r.trades);
   S.trades = r.trades.map(adoptTrade);
-  save(); paintWallet();
+  save(); checkBadges(); paintWallet(); paintMine();
 }
 
 async function loadMarkets() {
@@ -211,44 +268,36 @@ function eventCard(e, i) {
 }
 
 // ── trade ticket ──
-// est0: odds to start the slider at (the AI Scanner passes its estimate); defaults to the crowd's price
+// est0: YES odds stored with the trade (the AI Scanner passes its estimate); otherwise the AI opinion's midpoint, else the crowd's price
 export function openTicket(e, m, side0, est0) {
-  let side = side0, est = est0 || Math.round(m.yes * 100), amt = AMOUNTS.find(a => a <= S.simCash && a >= 25) || 10, busy = false, err = '';
+  let side = side0, est = est0 || null, amt = AMOUNTS.find(a => a <= S.simCash && a >= 25) || 10, busy = false, err = '';
   const title = e.title + (e.markets.length > 1 || m.label !== 'Yes' ? ` · ${m.label}` : '');
   const layer = $('#layer');
   let review = null, closed = false;
   const fetchReview = () => getReview(e, m, title).then(r => { review = r; if (!closed && layer.firstChild) draw(); });
+  const estNow = () => est || (review && review.review ? Math.round((review.review.ai_low + review.review.ai_high) / 2) : Math.round(m.yes * 100));
   function draw() {
     const price = side === 'yes' ? m.yes : m.no, pc = Math.round(price * 100);
     const shares = Math.floor(amt / price), cost = shares * price;
     const prev = layer.querySelector('.sheet-in'), scrollY = prev ? prev.scrollTop : 0; // keep the scroll position on redraw
-    const edge = (side === 'yes' ? est : 100 - est) - pc;
     layer.innerHTML = `<div class="sheet${layer.firstChild ? '' : ' enter'}" role="dialog" aria-modal="true" aria-label="Trade"><div class="sheet-in">
       <div class="sheet-top"><button class="x" data-close aria-label="Close">×</button><span class="small muted">${platformName(e.platform)}${e.closes ? ` · closes ${closeDate(e.closes)}` : ''}</span></div>
       <div class="lesson-body">
         <h2>${esc(title)}</h2>
-        <div class="card"><p class="eyebrow">1 · Your odds first</p>
-          <div class="kv"><span>I think YES has a</span><b>${est}%</b></div>
-          <input type="range" min="1" max="99" value="${est}" id="est" aria-label="Your odds for YES">
-          <div class="odds"><div class="odds-row"><span>Crowd</span><span class="track"><i style="width:${Math.round(m.yes * 100)}%"></i></span><b class="mono">${Math.round(m.yes * 100)}%</b></div>
-          <div class="odds-row you"><span>You</span><span class="track"><i style="width:${est}%"></i></span><b class="mono">${est}%</b></div></div>
-        </div>
-        <div class="card"><p class="eyebrow">2 · Side and size</p>
+        <div class="card"><p class="eyebrow">Pick a side and amount</p>
           <div class="side"><button class="yes" data-side="yes" aria-pressed="${side === 'yes'}">YES ${cents(m.yes)}</button><button class="no" data-side="no" aria-pressed="${side === 'no'}">NO ${cents(m.no)}</button></div>
           <div class="amounts">${AMOUNTS.map(a => `<button data-amt="${a}" aria-pressed="${a === amt}" ${a > S.simCash ? 'disabled' : ''}>$${a}</button>`).join('')}</div>
           <div class="kv"><span>Contracts</span><b>${shares}</b></div>
           <div class="kv"><span>Max loss</span><b>${usd(cost)}</b></div>
           <div class="kv"><span>Payout if right</span><b>${usd(shares)}</b></div>
-          <p class="small" style="color:${edge > 0 ? 'var(--hit)' : edge < 0 ? 'var(--miss)' : 'var(--ink-muted)'}">${edge > 0 ? `Your odds are ${edge} pts above the price. The math says this side looks cheap.` : edge === 0 ? 'Your odds match the price. No edge here.' : `Your odds are ${-edge} pts below the price. The math says skip or take the other side.`}</p>
         </div>
-        ${reviewCard(review, side, price, shares, est)}
+        ${reviewCard(review, side, price)}
         ${err ? `<p class="feedback miss" role="alert">${esc(err)}</p>` : ''}
       </div>
       <div class="lesson-foot"><button class="btn" data-buy-now ${busy || cost > S.simCash || !shares ? 'disabled' : ''}>${busy ? 'Placing…' : `Place play-money trade · ${usd(cost)}`}</button>
         <p class="disc">Uses your simulator cash (${usd(S.simCash)} left). The price is locked from the live market when you tap.</p></div>
     </div></div>`;
     layer.querySelector('.sheet-in').scrollTop = scrollY;
-    $('#est').oninput = ev => { est = +ev.target.value; draw(); $('#est').focus(); };
   }
   layer.onclick = async ev => {
     if (ev.target.closest('[data-close]')) { closed = true; layer.innerHTML = ''; layer.onclick = null; return; }
@@ -257,7 +306,7 @@ export function openTicket(e, m, side0, est0) {
     const a = ev.target.closest('[data-amt]'); if (a) { amt = +a.dataset.amt; draw(); return; }
     if (ev.target.closest('[data-buy-now]') && !busy) {
       busy = true; err = ''; draw();
-      const r = await post({ action: 'open', platform: e.platform, market_id: m.id, side, amount: amt, est, title });
+      const r = await post({ action: 'open', platform: e.platform, market_id: m.id, side, amount: amt, est: estNow(), title });
       busy = false;
       if (!r.ok) { err = TRADE_ERR[r.error] || 'The trade didn’t go through. Try again.'; return draw(); }
       const t = adoptTrade(r.trade);
@@ -265,30 +314,12 @@ export function openTicket(e, m, side0, est0) {
       S.trades = [t].concat(S.trades.filter(x => x.id !== t.id));
       S.xp += 10; touchStreak(); save(); checkBadges();
       S.simPlatform = e.platform; save();
-      closed = true; layer.innerHTML = ''; layer.onclick = null; setSimTab('mine'); location.hash = '#/sim'; route();
+      closed = true; layer.innerHTML = ''; layer.onclick = null; setSimTab('home'); location.hash = '#/sim'; route();
+      if (!S.scanCtaSeen && S.trades.length === 1) { if (S.simIntroSeen) showScanCta(); else ctaAfterIntro = true; } // first trade only; after the demo-money notice if it is showing
     }
   };
   draw();
   fetchReview();
-}
-
-// ── my calls ──
-async function loadMine() {
-  const r = await post({ action: 'list' });
-  const box = () => $('#sim-mine');
-  if (!r.ok) { if (box()) box().innerHTML = `<div class="card"><h3>Calls didn’t load</h3><p class="muted small">${esc(TRADE_ERR[r.error] || 'Try again in a minute.')}</p><button class="btn ghost" data-retry>Try again</button></div>`; return; }
-  creditClosed(r.trades);
-  S.trades = r.trades.map(adoptTrade);
-  save(); checkBadges(); paintWallet();
-  if (!box()) return;
-  const ts = mine(), open = ts.filter(t => t.status === 'open'), closed = ts.filter(t => t.status !== 'open');
-  const st = stats(ts);
-  box().innerHTML = !ts.length
-    ? `<div class="card"><h3>No ${platformName(platform())} calls yet</h3><p class="muted small">Pick a live market, write your own odds and place a play-money trade.</p><button class="btn" data-seg="markets">Browse markets</button></div>`
-    : `${st.n ? `<div class="score"><div><b>${st.n}</b><span class="small muted">settled</span></div><div><b>${Math.round(st.hit * 100)}%</b><span class="small muted">right side</span></div><div><b>${st.brier.toFixed(2)}</b><span class="small muted">Brier</span></div></div>` : ''}
-      ${open.length ? `<h3>Open · ${open.length}</h3>${open.map(tradeCard).join('')}` : ''}
-      ${closed.length ? `<h3>Closed</h3>${closed.map(tradeCard).join('')}` : ''}
-      <p class="disc">Open calls settle on their own when the event resolves. You can also sell early at the live price.</p>`;
 }
 
 // Adds the payout of trades that closed since the last look (won, lost, sold) to the simulator cash, once each,
@@ -309,28 +340,45 @@ function creditClosed(trades) {
   post({ action: 'ack', ids: fresh.map(t => t.id) });
 }
 
-function tradeCard(t) {
-  const cost = t.shares * t.price;
-  let status, line;
-  if (t.status === 'open') {
-    const now = t.now != null ? Number(t.now) : null, value = now != null ? t.shares * now : null, pl = value != null ? value - cost : null;
-    status = '<span class="chip">Open</span>';
-    line = now != null
-      ? `<div class="kv small"><span>Now ${cents(now)} · worth ${usd(value)}</span><b style="color:${pl >= 0 ? 'var(--hit)' : 'var(--miss)'}">${pl >= 0 ? '+' : '−'}${usd(Math.abs(pl))}</b></div>
-         <button class="btn ghost" data-sell="${t.id}" ${now > 0 ? '' : 'disabled'}>Sell now · ${usd(value)}</button>`
-      : '<p class="small muted">Live price unavailable right now.</p>';
-  } else if (t.status === 'sold') {
-    const got = t.shares * t.exit_price, pl = got - cost;
-    status = `<span class="chip ${pl >= 0 ? 'hit' : 'miss'}">Sold ${pl >= 0 ? '+' : '−'}${usd(Math.abs(pl))}</span>`;
-    line = `<p class="small muted">Sold at ${cents(t.exit_price)} for ${usd(got)}</p>`;
-  } else {
-    status = t.status === 'won' ? `<span class="chip hit">Won ${usd(t.shares)}</span>` : `<span class="chip miss">Lost ${usd(cost)}</span>`;
-    line = `<p class="small muted">The event ${t.outcome ? 'happened' : 'didn’t happen'}.</p>`;
+// ── one contract, in detail ──
+function openContract(id) {
+  const t = S.trades.find(x => x.id === id); if (!t) return;
+  const layer = $('#layer');
+  let busy = false, err = '';
+  function draw() {
+    const cost = costOf(t), value = valueOf(t), pnl = value - cost, now = t.now != null ? Number(t.now) : null;
+    const rows = [
+      ['Side', `${t.side.toUpperCase()} · ${t.shares} contracts`],
+      ['Bought at', `${cents(t.price)} · ${usd(cost)}`],
+      t.status === 'open' ? ['Price now', now != null ? cents(now) : 'unavailable'] : t.status === 'sold' ? ['Sold at', `${cents(t.exit_price)} · ${usd(value)}`] : ['Result', t.outcome ? 'The event happened' : 'The event didn’t happen'],
+      [t.status === 'open' ? 'Worth now' : 'You got back', usd(value)],
+      ['Pays if right', usd(t.shares)],
+      ['Chance of YES: AI vs price', `${t.est}% vs ${Math.round((t.side === 'yes' ? t.price : 1 - t.price) * 100)}%`], // est: YES odds from the AI opinion at purchase (or the crowd's if none)
+      ['Opened', new Date(t.opened_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })]
+    ];
+    layer.innerHTML = `<div class="sheet${layer.firstChild ? '' : ' enter'}" role="dialog" aria-modal="true" aria-label="Contract"><div class="sheet-in">
+      <div class="av-top"><button class="x" data-close aria-label="Close">×</button><h3>${platformName(t.platform)}</h3><span></span></div>
+      <h2 class="c-title">${esc(t.title)}</h2>
+      <div class="c-big ${tone(pnl)}"><span class="small muted">${t.status === 'open' ? 'P&amp;L so far' : 'Final P&amp;L'}</span><b class="mono">${money(pnl)}</b><span>${pctOf(pnl, cost)}</span></div>
+      <div class="card"><div class="list">${rows.map(([k, v]) => `<div class="li"><span class="muted">${k}</span><span>${v}</span></div>`).join('')}</div></div>
+      ${err ? `<p class="feedback miss" role="alert">${esc(err)}</p>` : ''}
+      ${t.status === 'open' ? `<div class="lesson-foot"><button class="btn" data-sell-now ${busy || !(now > 0) ? 'disabled' : ''}>${busy ? 'Selling…' : now > 0 ? `Sell now · ${usd(value)}` : 'No buyers right now'}</button>
+        <p class="disc">Or keep it: it settles on its own when the event ends. Demo money only.</p></div>` : ''}
+    </div></div>`;
   }
-  return `<div class="card trade"><h3>${esc(t.title)}</h3>
-    <div class="kv"><span>${t.side.toUpperCase()} · ${t.shares} @ ${cents(t.price)}</span>${status}</div>
-    <div class="kv small muted"><span>Your odds ${t.est}% · crowd ${Math.round(t.price * 100)}%</span><span>${platformName(t.platform)}</span></div>
-    ${line}</div>`;
+  layer.onclick = async e => {
+    if (e.target.closest('[data-close]')) { layer.innerHTML = ''; layer.onclick = null; return; }
+    if (e.target.closest('[data-sell-now]') && !busy) {
+      busy = true; err = ''; draw();
+      const r = await post({ action: 'sell', id: t.id });
+      busy = false;
+      if (!r.ok) { err = TRADE_ERR[r.error] || 'Couldn’t sell. Try again.'; return draw(); }
+      await refreshTrades();
+      const u = S.trades.find(x => x.id === t.id); if (u) Object.assign(t, u);
+      draw();
+    }
+  };
+  draw();
 }
 
 // ── events ──
@@ -347,6 +395,7 @@ document.addEventListener('input', ev => {
 });
 document.addEventListener('click', async ev => {
   if (ev.target.closest('[data-pnl-info]')) { showPnlInfo(); return; }
+  const ct = ev.target.closest('[data-contract]'); if (ct) { openContract(+ct.dataset.contract); return; }
   const p = ev.target.closest('[data-plat]');
   if (p) { S.simPlatform = p.dataset.plat; save(); cat = 'hot'; query = ''; categories = []; openEvents.clear(); route(); return; }
   const c = ev.target.closest('[data-cat]');
@@ -356,11 +405,4 @@ document.addEventListener('click', async ev => {
   const b = ev.target.closest('[data-buy]');
   if (b) { const [i, j, side] = b.dataset.buy.split(':'); const e = events[+i]; if (e) openTicket(e, e.markets[+j], side); return; }
   if (ev.target.closest('[data-retry]')) { listCache.clear(); loadSim(); return; }
-  const s = ev.target.closest('[data-sell]');
-  if (s && !s.disabled) {
-    s.disabled = true; s.textContent = 'Selling…';
-    const r = await post({ action: 'sell', id: Number(s.dataset.sell) });
-    if (!r.ok) { s.textContent = TRADE_ERR[r.error] || 'Couldn’t sell. Try again.'; setTimeout(loadMine, 2500); return; }
-    loadMine();
-  }
 });

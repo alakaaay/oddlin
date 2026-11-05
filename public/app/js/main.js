@@ -42,6 +42,14 @@ document.addEventListener('click', e => {
   const bd = e.target.closest('[data-badge]'); if (bd) { openBadge(BADGES.find(b => b.id === bd.dataset.badge)); return; }
   if (e.target.closest('[data-settings]')) { openSettings(); return; }
   if (e.target.closest('[data-billing]')) { openBilling(); return; }
+  const rn = e.target.closest('[data-real-notify]');
+  if (rn && !S.realInterest) {
+    S.realInterest = new Date().toISOString(); save(); // saved with progress; the team reads it from user_progress
+    rn.disabled = true; rn.classList.replace('gold', 'ghost'); rn.textContent = '✓ We’ll remind you first';
+    rn.insertAdjacentHTML('afterend', '<p class="disc center">You’ll be among the first to know, right here in the app.</p>');
+    tip('Done! You’ll be first to know when real trading opens.');
+    return;
+  }
   const nb = e.target.closest('[data-arb-notify]');
   if (nb && !S.arbInterest) {
     S.arbInterest = new Date().toISOString(); save(); // saved with progress; the team reads it from user_progress
