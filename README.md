@@ -33,7 +33,7 @@ The first time on macOS, Gatekeeper may block `start.command`: right-click it, c
 | `start.command`, `start.bat` | Launchers for macOS and Windows |
 | `design.html` | Design tokens, open it in a browser to see them |
 | `public/quiz/index.html` | Quiz markup and the Meta Pixel base code, served at `/quiz` |
-| `public/app/` | App MVP skeleton at `/app`: Learn path (home), AI Coach, Simulator, Leaderboard, Profile. Demo data only, progress in localStorage, no pixel |
+| `public/app/` | App MVP at `/app`: `index.html`, `app.css`, and ES modules in `js/` (no build step). Entry `js/main.js`; one module per area: `state` (player state, sync, streak), `course` (lessons and quizzes), `visuals` (slide illustrations), `views` (tab screens), `router`, `player` (lesson and quiz player, retake popup), `chest`, `perks` (streak calendar, gifts, bonus), `progression` (ranks, badges), `board`, `avatar`, `share`, `settings`, `gate` (sign-in and sign-up), `sim` and `coach` (in development), `util` |
 | `vercel.json` | Redirects `/` to `/quiz` on Vercel |
 | `public/css/tokens.css` | Tokens as CSS variables |
 | `public/css/app.css` | Quiz styles |
@@ -108,11 +108,11 @@ Sign-in to `/app` (`POST /api/auth`, one endpoint with an `action`, logic in `li
 
 ## Email
 
-`lib/mail.js` sends the sign-in and password-reset codes, nothing else. There is no public send endpoint. `welcomeEmail()` is kept in the module but is not sent anywhere.
+`lib/mail.js` sends the sign-in and password-reset codes, nothing else. There is no public send endpoint.
 
 - Env: `GMAIL_USER` + `GMAIL_APP_PASSWORD` (Gmail SMTP, `lib/smtp.js`, any recipient within Gmail's daily limit; used first when set), or `RESEND_API_KEY` with optional `MAIL_FROM`. All server only.
 - Without a verified domain Resend only sends from `onboarding@resend.dev` to your own Resend account email. Real recipients need a verified domain and an unsubscribe link in non-transactional emails.
-- Test: `node scripts/send-test-email.js you@example.com`
+- Test: `node scripts/send-test-email.js you@example.com` sends one sign-in code email (the code signs nobody in).
 
 ## Database
 
