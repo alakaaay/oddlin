@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const { loadEnv } = require('./lib/env');
+const { publicConfigJS } = require('./lib/public-config');
 const { logEvent } = require('./lib/event');
 const { saveSubscriber } = require('./lib/subscribe');
 const { auth, purchase } = require('./lib/auth');
@@ -121,6 +122,8 @@ function handle(req, res) {
     res.writeHead(307, { Location: '/quiz' + new URL(req.url, `http://${HOST}`).search, 'Cache-Control': 'no-store' });
     return res.end();
   }
+  // Public settings from .env.local (on Vercel the build writes this file): META_PIXEL_ID here is the test pixel
+  if (pathname === '/js/config.js') return send(res, 200, publicConfigJS(), TYPES['.js']);
   if (pathname.endsWith('/')) pathname += 'index.html';
 
   // Resolve inside public/ only: blocks ../ traversal and absolute paths

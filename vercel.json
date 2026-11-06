@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node scripts/build-config.js",
+  "outputDirectory": "public",
   "redirects": [
     { "source": "/", "destination": "/quiz", "permanent": false }
+  ],
+  "headers": [
+    { "source": "/js/config.js", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
   ]
 }

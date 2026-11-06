@@ -8,3 +8,6 @@ dist/
 .netlify/
 .claude/
 data/
+
+# generated at build time from env vars (scripts/build-config.js)
+public/js/config.js

@@ -57,7 +57,15 @@ Landing (FOMO hook + plain-English ticket) → 8 steps: age, booms you sat out, 
 
 ## Tracking
 
-Meta Pixel `1801702574890246`, base code in `public/quiz/index.html`.
+Meta Pixel ID comes from the env var `META_PIXEL_ID`, set per environment, so tests never report into the live pixel:
+
+| Where | `META_PIXEL_ID` |
+|---|---|
+| Vercel Production (`oddlin.vercel.app`) | the live pixel |
+| Vercel Preview | the test pixel `1801702574890246` |
+| Local (`.env.local`) | the test pixel `1801702574890246` |
+
+On Vercel the build (`node scripts/build-config.js`, set in `vercel.json`) writes `public/js/config.js` with `window.ODDLIN_CONFIG = { pixel }`; locally `server.js` serves the same file from `.env.local` (`lib/public-config.js`). The quiz loads it before the pixel base code in `public/quiz/index.html`. No `META_PIXEL_ID` means no pixel at all. The file is generated, so it is in `.gitignore`. After changing the variable in Vercel, redeploy: the value is baked in at build time.
 
 - Standard events: `PageView`, `ViewContent` (quiz start), `Lead` (email), `InitiateCheckout` (paywall), `Purchase` (Start my plan, no real charge)
 - Commerce events (`ViewContent`, `InitiateCheckout`, `Purchase`) carry `content_type: "product"` and `content_ids`: `oddlin_w1`, `oddlin_w4`, `oddlin_w12`. `ViewContent` lists all three plans; checkout and purchase list the chosen one with `value`, `currency` and `contents`. `InitiateCheckout` fires once per visit

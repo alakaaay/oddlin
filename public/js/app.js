@@ -65,7 +65,8 @@ async function matchEmail(email) {
     const norm = email.trim().toLowerCase();
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(norm));
     const em = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-    window.fbq('init', '1801702574890246', { em });
+    const id = (window.ODDLIN_CONFIG || {}).pixel;
+    if (id && window.fbq) window.fbq('init', id, { em });
   } catch (e) {}
 }
 

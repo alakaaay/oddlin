@@ -24,8 +24,12 @@ window.oddlinSession = (function () {
   return id;
 })();
 </script>
+<!-- Settings from env vars: window.ODDLIN_CONFIG.pixel is the live pixel in Production, the test pixel elsewhere, or empty -->
+<script src="/js/config.js"></script>
 <!-- Meta Pixel Code -->
 <script>
+(function (id) {
+if (!id) return; // no pixel configured for this environment: nothing is sent to Meta
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -34,15 +38,13 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1801702574890246');
+fbq('init', id);
 fbq('track', 'PageView', { session_id: window.oddlinSession });
+})((window.ODDLIN_CONFIG || {}).pixel);
 </script>
 <!-- End Meta Pixel Code -->
 </head>
 <body>
-<noscript><img height="1" width="1" style="display:none" alt=""
-src="https://www.facebook.com/tr?id=1801702574890246&ev=PageView&noscript=1"
-/></noscript>
 <div class="app">
   <header>
     <div class="top">
