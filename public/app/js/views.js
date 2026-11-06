@@ -1,6 +1,6 @@
 // Tab screens (Learn map, AI Coach, Simulator, Leaderboard, Profile, Achievements) as HTML strings.
 import { avatarSVG } from './avatar.js';
-import { ALL, CHEST, COURSE, TEST_UNLOCK, UPCOMING, nextNode } from './course.js';
+import { CHEST, COURSE, TEST_UNLOCK, UPCOMING, nextNode } from './course.js';
 import { AVG_MIN, BADGES, LEARNERS, level } from './progression.js';
 import { fmtDate } from './share.js';
 import { boardTab } from './board.js';
@@ -226,7 +226,9 @@ export const VIEWS = {
     const mins = Math.round(S.learnSec / 60);
     const tiers = [1, 2, 4, 6]; // lessons done by the 25th, 50th, 75th and 90th percentile learner (demo)
     const myBar = tiers.filter(t => mine >= t).length - 1;
-    const planPct = Math.round(mine / ALL.length * 100);
+    // 28-day plan in days, the same count as the map: a day counts once all its lessons and its quiz are done
+    const PLAN_DAYS = 28, daysDone = COURSE.filter(d => d.nodes.every(n => S.done.includes(n.id))).length;
+    const planPct = Math.round(daysDone / PLAN_DAYS * 100);
     const list = BADGES.map(b => Object.assign({ got: S.badges.includes(b.id) }, b, b.prog()));
     list.sort((a, b) => b.got - a.got);
     const shown = list.slice(0, 4);
@@ -245,7 +247,7 @@ export const VIEWS = {
       </div></div>
 
       <div class="card"><h3>Progress</h3>
-        <div class="kv small"><span>28-day plan</span><b>${mine}/${ALL.length} lessons</b></div>
+        <div class="kv small"><span>28-day plan</span><b>Day ${daysDone}/${PLAN_DAYS}</b></div>
         <div class="lv thick"><i style="width:${planPct}%"></i></div>
         <div class="cmp">
           <div>${mine ? `<p>You completed more lessons than <b class="hl">${pct}% of learners</b></p>` : '<p>Finish your first lesson to see how you compare with other learners.</p>'}</div>
